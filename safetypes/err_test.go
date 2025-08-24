@@ -5,14 +5,15 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestErr_ReturnsNewErrResult(t *testing.T) {
 	err := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
 
-	res := Err[any, error](err)
+	res := Err[any](err)
 
-	expected := &errT[any, error]{
+	expected := &errT[any]{
 		err: err,
 	}
 	assert.Equal(t, expected, res)
@@ -20,14 +21,14 @@ func TestErr_ReturnsNewErrResult(t *testing.T) {
 
 func TestErr_IsOk(t *testing.T) {
 	err := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
-	e := Err[any, error](err)
+	e := Err[any](err)
 
 	assert.False(t, e.IsOk())
 }
 
 func TestErr_IsOkAnd(t *testing.T) {
 	err := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
-	e := Err[any, error](err)
+	e := Err[any](err)
 
 	for _, res := range []bool{true, false} {
 		name := fmt.Sprintf("predicate returns %v", res)
@@ -45,14 +46,14 @@ func TestErr_IsOkAnd(t *testing.T) {
 
 func TestErr_IsErr(t *testing.T) {
 	err := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
-	e := Err[any, error](err)
+	e := Err[any](err)
 
 	assert.True(t, e.IsErr())
 }
 
 func TestErr_IsErrAnd(t *testing.T) {
 	err := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
-	e := Err[any, error](err)
+	e := Err[any](err)
 
 	for _, res := range []bool{true, false} {
 		name := fmt.Sprintf("predicate returns %v", res)
@@ -75,7 +76,7 @@ func TestErr_IsErrAnd(t *testing.T) {
 
 func TestErr_Expect(t *testing.T) {
 	err := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
-	e := Err[any, error](err)
+	e := Err[any](err)
 
 	msg := fake.RandomStringWithLength(8)
 	expectedError := fmt.Errorf("%s: %w", msg, err)
@@ -86,7 +87,7 @@ func TestErr_Expect(t *testing.T) {
 
 func TestErr_ExpectErr(t *testing.T) {
 	err := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
-	e := Err[any, error](err)
+	e := Err[any](err)
 
 	msg := fake.RandomStringWithLength(8)
 
@@ -95,7 +96,7 @@ func TestErr_ExpectErr(t *testing.T) {
 
 func TestErr_Inspect(t *testing.T) {
 	err := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
-	e := Err[any, error](err)
+	e := Err[any](err)
 
 	f := func(_ *any) {
 		assert.Fail(t, "inspector should not be called")
@@ -106,13 +107,13 @@ func TestErr_Inspect(t *testing.T) {
 
 func TestErr_InspectErr(t *testing.T) {
 	err := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
-	e := Err[any, error](err)
+	e := Err[any](err)
 
 	called := false
-	f := func(ep *error) {
+	f := func(ep error) {
 		called = true
 
-		assert.Equal(t, err, *ep)
+		assert.Equal(t, err, ep)
 	}
 
 	assert.Equal(t, e, e.InspectErr(f))
@@ -121,7 +122,7 @@ func TestErr_InspectErr(t *testing.T) {
 
 func TestErr_Unwrap(t *testing.T) {
 	err := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
-	e := Err[any, error](err)
+	e := Err[any](err)
 
 	expected := fmt.Errorf("called `Result.Unwrap()` on an `Err` value: %w", err)
 	assert.PanicsWithError(t, expected.Error(), func() {
@@ -131,7 +132,7 @@ func TestErr_Unwrap(t *testing.T) {
 
 func TestErr_UnwrapOr(t *testing.T) {
 	err := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
-	e := Err[any, error](err)
+	e := Err[any](err)
 
 	def := fake.RandomStringWithLength(8)
 
@@ -140,7 +141,7 @@ func TestErr_UnwrapOr(t *testing.T) {
 
 func TestErr_UnwrapOrElse(t *testing.T) {
 	err := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
-	e := Err[any, error](err)
+	e := Err[any](err)
 
 	def := fake.RandomStringWithLength(8)
 	f := func() any {
@@ -152,9 +153,9 @@ func TestErr_UnwrapOrElse(t *testing.T) {
 
 func TestErr_UnwrapOrDefault(t *testing.T) {
 	err := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
-	errStr := Err[string, error](err)
-	errInt := Err[int, error](err)
-	errFloat := Err[float64, error](err)
+	errStr := Err[string](err)
+	errInt := Err[int](err)
+	errFloat := Err[float64](err)
 
 	assert.Zero( //nolint:testifylint  // Using assert.Zero for consistency
 		t,
@@ -166,14 +167,37 @@ func TestErr_UnwrapOrDefault(t *testing.T) {
 
 func TestErr_UnwrapErr(t *testing.T) {
 	err := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
-	e := Err[any, error](err)
+	e := Err[any](err)
 
 	assert.Equal(t, err, e.UnwrapErr())
 }
 
+func TestErr_WrapErr(t *testing.T) {
+	sourceErr := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
+	o := Err[int](sourceErr)
+
+	msg := fake.RandomStringWithLength(8)
+	result := o.WrapErr(msg)
+
+	assert.True(t, result.IsErr())
+
+	err := result.UnwrapErr()
+	require.ErrorContains(t, err, sourceErr.Error())
+	require.ErrorContains(t, err, msg)
+}
+
+func TestErr_Expand(t *testing.T) {
+	sourceErr := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
+	o := Err[int](sourceErr)
+
+	v, err := o.Expand()
+	require.ErrorContains(t, err, sourceErr.Error())
+	assert.Zero(t, v)
+}
+
 func TestErr_String(t *testing.T) {
 	err := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
-	e := Err[any, error](err)
+	e := Err[any](err)
 
 	expected := fmt.Sprintf("Err(%v)", err)
 	assert.Equal(t, expected, e.String())

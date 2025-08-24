@@ -5,28 +5,29 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestOK_ReturnsNewOkResult(t *testing.T) {
 	value := fake.Lorem().Word()
 
-	res := Ok[string, error](value)
+	res := Ok[string](value)
 
-	expected := &ok[string, error]{
+	expected := &ok[string]{
 		val: value,
 	}
 	assert.Equal(t, expected, res)
 }
 
 func TestOk_IsOk(t *testing.T) {
-	o := Ok[int, error](fake.Int())
+	o := Ok[int](fake.Int())
 
 	assert.True(t, o.IsOk())
 }
 
 func TestOk_IsOkAnd(t *testing.T) {
 	value := fake.Int()
-	o := Ok[int, error](value)
+	o := Ok[int](value)
 
 	for _, res := range []bool{true, false} {
 		name := fmt.Sprintf("predicate returns %v", res)
@@ -48,13 +49,13 @@ func TestOk_IsOkAnd(t *testing.T) {
 }
 
 func TestOk_IsErr(t *testing.T) {
-	o := Ok[int, error](fake.Int())
+	o := Ok[int](fake.Int())
 
 	assert.False(t, o.IsErr())
 }
 
 func TestOk_IsErrAnd(t *testing.T) {
-	o := Ok[int, error](fake.Int())
+	o := Ok[int](fake.Int())
 
 	for _, res := range []bool{true, false} {
 		name := fmt.Sprintf("predicate returns %v", res)
@@ -72,7 +73,7 @@ func TestOk_IsErrAnd(t *testing.T) {
 
 func TestOk_Expect(t *testing.T) {
 	value := fake.Int()
-	o := Ok[int, error](value)
+	o := Ok[int](value)
 
 	msg := fake.RandomStringWithLength(8)
 	assert.Equal(t, value, o.Expect(msg))
@@ -80,7 +81,7 @@ func TestOk_Expect(t *testing.T) {
 
 func TestOk_ExpectErr(t *testing.T) {
 	value := fake.Int()
-	o := Ok[int, error](value)
+	o := Ok[int](value)
 
 	msg := fake.RandomStringWithLength(8)
 	expectedError := fmt.Errorf("%s: %v", msg, value)
@@ -91,7 +92,7 @@ func TestOk_ExpectErr(t *testing.T) {
 
 func TestOk_Inspect(t *testing.T) {
 	value := fake.Int()
-	o := Ok[int, error](value)
+	o := Ok[int](value)
 
 	called := false
 	f := func(v *int) {
@@ -106,9 +107,9 @@ func TestOk_Inspect(t *testing.T) {
 
 func TestOk_InspectErr(t *testing.T) {
 	value := fake.Int()
-	o := Ok[int, error](value)
+	o := Ok[int](value)
 
-	f := func(_ *error) {
+	f := func(_ error) {
 		assert.Fail(t, "inspector should not be called")
 	}
 
@@ -117,14 +118,14 @@ func TestOk_InspectErr(t *testing.T) {
 
 func TestOk_Unwrap(t *testing.T) {
 	value := fake.Int()
-	s := Ok[int, error](value)
+	s := Ok[int](value)
 
 	assert.Equal(t, value, s.Unwrap())
 }
 
 func TestOk_UnwrapOr(t *testing.T) {
 	value := fake.Int()
-	s := Ok[int, error](value)
+	s := Ok[int](value)
 
 	def := fake.Int()
 
@@ -133,7 +134,7 @@ func TestOk_UnwrapOr(t *testing.T) {
 
 func TestOk_UnwrapOrElse(t *testing.T) {
 	value := fake.Int()
-	s := Ok[int, error](value)
+	s := Ok[int](value)
 
 	def := fake.Int()
 	f := func() int {
@@ -150,18 +151,18 @@ func TestOk_UnwrapOrDefault(t *testing.T) {
 	valInt := fake.IntBetween(1, 100)
 	valFloat := fake.Float64(2, 1, 100)
 
-	assert.Equal(t, valStr, Ok[string, error](valStr).UnwrapOrDefault())
-	assert.Equal(t, valInt, Ok[int, error](valInt).UnwrapOrDefault())
+	assert.Equal(t, valStr, Ok[string](valStr).UnwrapOrDefault())
+	assert.Equal(t, valInt, Ok[int](valInt).UnwrapOrDefault())
 	assert.Equal( //nolint:testifylint  // Value should be _exactly_ equal
 		t,
 		valFloat,
-		Ok[float64, error](valFloat).UnwrapOrDefault(),
+		Ok[float64](valFloat).UnwrapOrDefault(),
 	)
 }
 
 func TestOk_UnwrapErr(t *testing.T) {
 	value := fake.Int()
-	o := Ok[int, error](value)
+	o := Ok[int](value)
 
 	expected := fmt.Errorf("called `Result.UnwrapErr()` on an `Ok` value: %v", value)
 	assert.PanicsWithError(t, expected.Error(), func() {
@@ -169,9 +170,30 @@ func TestOk_UnwrapErr(t *testing.T) {
 	})
 }
 
+func TestOk_WrapErr(t *testing.T) {
+	value := fake.Int()
+	o := Ok[int](value)
+
+	msg := fake.RandomStringWithLength(8)
+	result := o.WrapErr(msg)
+
+	assert.Same(t, o, result)
+	assert.True(t, result.IsOk())
+	assert.Equal(t, value, result.Unwrap())
+}
+
+func TestOk_Expand(t *testing.T) {
+	value := fake.Int()
+	o := Ok[int](value)
+
+	v, err := o.Expand()
+	require.NoError(t, err)
+	assert.Equal(t, value, v)
+}
+
 func TestOk_String(t *testing.T) {
 	value := fake.Int()
-	o := Ok[int, error](value)
+	o := Ok[int](value)
 
 	expected := fmt.Sprintf("Ok(%v)", value)
 	assert.Equal(t, expected, o.String())

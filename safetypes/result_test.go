@@ -46,16 +46,16 @@ func TestFrom_ReturnsNewResultFromArgs(t *testing.T) {
 func TestMapResult_ReturnsANewResultWithMappedResultValue(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		value := fake.Int()
-		o := Ok[int, error](value)
+		o := Ok[int](value)
 
-		expected := Ok[string, error](strconv.Itoa(value))
+		expected := Ok[string](strconv.Itoa(value))
 
 		assert.Equal(t, expected, MapResult(o, strconv.Itoa))
 	})
 
 	t.Run("err", func(t *testing.T) {
 		err := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
-		e := Err[any, error](err)
+		e := Err[any](err)
 
 		f := func(any) int {
 			assert.Fail(t, "mapper should not have been called")
@@ -63,7 +63,7 @@ func TestMapResult_ReturnsANewResultWithMappedResultValue(t *testing.T) {
 			return 0
 		}
 
-		expected := &errT[int, error]{err}
+		expected := &errT[int]{err}
 
 		assert.Equal(t, expected, MapResult(e, f))
 	})
@@ -72,7 +72,7 @@ func TestMapResult_ReturnsANewResultWithMappedResultValue(t *testing.T) {
 func TestMapResultOr_ReturnsTheMappedResultValueOrDefault(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		value := fake.Int()
-		o := Ok[int, error](value)
+		o := Ok[int](value)
 
 		def := fake.RandomStringWithLength(9)
 
@@ -83,7 +83,7 @@ func TestMapResultOr_ReturnsTheMappedResultValueOrDefault(t *testing.T) {
 
 	t.Run("err", func(t *testing.T) {
 		err := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
-		e := Err[any, error](err)
+		e := Err[any](err)
 
 		def := fake.RandomStringWithLength(9)
 		f := func(any) string {
@@ -99,7 +99,7 @@ func TestMapResultOr_ReturnsTheMappedResultValueOrDefault(t *testing.T) {
 func TestMapResultOrElse_ReturnsTheMappedResultValueOrCallsDefaultFactory(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		value := fake.Int()
-		o := Ok[int, error](value)
+		o := Ok[int](value)
 
 		factory := func() string {
 			assert.Fail(t, "factory should not have been called")
@@ -114,7 +114,7 @@ func TestMapResultOrElse_ReturnsTheMappedResultValueOrCallsDefaultFactory(t *tes
 
 	t.Run("err", func(t *testing.T) {
 		err := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
-		e := Err[any, error](err)
+		e := Err[any](err)
 
 		mapper := func(any) string {
 			assert.Fail(t, "mapper should not have been called")
@@ -133,31 +133,31 @@ func TestMapResultOrElse_ReturnsTheMappedResultValueOrCallsDefaultFactory(t *tes
 func TestMapResultErr_ReturnsANewResultWithMappedResultValue(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		value := fake.Int()
-		o := Ok[int, error](value)
+		o := Ok[int](value)
 
-		f := func(error) *MockError {
+		f := func(error) error {
 			assert.Fail(t, "mapper should not have been called")
 
 			return nil
 		}
 
-		expected := &ok[int, *MockError]{value}
+		expected := &ok[int]{value}
 
 		assert.Equal(t, expected, MapResultErr(o, f))
 	})
 
 	t.Run("err", func(t *testing.T) {
 		err := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
-		e := Err[any, error](err)
+		e := Err[any](err)
 
 		newE := &MockError{e: fmt.Errorf("mapped error: %w", err).Error()}
-		f := func(e error) *MockError {
+		f := func(e error) error {
 			assert.Equal(t, e, err)
 
 			return newE
 		}
 
-		expected := &errT[any, *MockError]{err: newE}
+		expected := &errT[any]{err: newE}
 
 		assert.Equal(t, expected, MapResultErr(e, f))
 	})

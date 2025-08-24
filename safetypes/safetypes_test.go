@@ -16,7 +16,7 @@ func TestAsOkOr(t *testing.T) {
 		value := fake.Int()
 		s := Some(value)
 
-		expected := Ok[int, error](value)
+		expected := Ok[int](value)
 
 		assert.Equal(t, expected, AsOkOr(s, errors.New(fake.RandomStringWithLength(8))))
 	})
@@ -25,7 +25,7 @@ func TestAsOkOr(t *testing.T) {
 		n := OptionOf(0)
 		err := errors.New(fake.RandomStringWithLength(8))
 
-		expected := Err[int, error](err)
+		expected := Err[int](err)
 
 		assert.Equal(t, expected, AsOkOr(n, err))
 	})
@@ -42,7 +42,7 @@ func TestAsOkOrElse(t *testing.T) {
 			return errors.New(fake.RandomStringWithLength(8))
 		}
 
-		expected := Ok[int, error](value)
+		expected := Ok[int](value)
 
 		assert.Equal(t, expected, AsOkOrElse(s, f))
 	})
@@ -64,7 +64,7 @@ func TestAsOkOrElse(t *testing.T) {
 func TestAsOptionValue(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		value := fake.Int()
-		o := Ok[int, error](value)
+		o := Ok[int](value)
 
 		assert.Equal(t, Some(value), AsOptionValue(o))
 	})
@@ -82,7 +82,7 @@ func TestAsOptionValue(t *testing.T) {
 func TestAsOptionErr(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		value := fake.Int()
-		o := Ok[int, error](value)
+		o := Ok[int](value)
 
 		expected := None[error]()
 

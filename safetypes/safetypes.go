@@ -1,26 +1,26 @@
-// Package st implements Rust-style Option[T] and Result[T, E]
+// Package st implements Rust-style Option[T] and Result[T]
 package st
 
 // AsOkOr converts an option to a Ok when opt is Some or result.Err when opt is None.
-func AsOkOr[T any, E error](opt Option[T], err E) Result[T, E] {
+func AsOkOr[T any](opt Option[T], err error) Result[T] {
 	if opt.IsSome() {
-		return Ok[T, E](opt.Unwrap())
+		return Ok[T](opt.Unwrap())
 	}
 
-	return Err[T, E](err)
+	return Err[T](err)
 }
 
 // AsOkOrElse converts an option to a Ok when opt is Some or result.Err when opt is None.
-func AsOkOrElse[T any, E error](opt Option[T], f func() E) Result[T, E] {
+func AsOkOrElse[T any](opt Option[T], f func() error) Result[T] {
 	if opt.IsSome() {
-		return Ok[T, E](opt.Unwrap())
+		return Ok[T](opt.Unwrap())
 	}
 
-	return Err[T, E](f())
+	return Err[T](f())
 }
 
 // AsOptionValue converts a Result to a Some when res is result.Ok or None when res is result.Err.
-func AsOptionValue[T any, E error](res Result[T, E]) Option[T] {
+func AsOptionValue[T any](res Result[T]) Option[T] {
 	if res.IsOk() {
 		return Some(res.Unwrap())
 	}
@@ -31,12 +31,12 @@ func AsOptionValue[T any, E error](res Result[T, E]) Option[T] {
 }
 
 // AsOptionErr converts a Result to a Some when res is result.Err or None when res is result.Ok.
-func AsOptionErr[T any, E error](res Result[T, E]) Option[E] {
+func AsOptionErr[T any](res Result[T]) Option[error] {
 	if res.IsErr() {
 		return OptionOf(res.UnwrapErr())
 	}
 
-	var v E
+	var v error
 
 	return OptionOf(v)
 }
