@@ -27,6 +27,10 @@ type Option[T any] interface {
 	UnwrapOrElse(f func() T) T
 	// UnwrapOrDefault returns the contained Some value or a default.
 	UnwrapOrDefault() T
+	// AsOkOr converts an option to a Ok when opt is Some or result.Err when opt is None.
+	AsOkOr(err error) Result[T]
+	// AsOkOrElse converts an option to a Ok when opt is Some or result.Err when opt is None.
+	AsOkOrElse(f func() error) Result[T]
 	// Inspect calls a function with a reference to the contained value if Some. Returns the original option.
 	Inspect(f func(T)) Option[T]
 	// Filter returns None if the option is None, otherwise calls predicate with the wrapped value and returns:
@@ -218,6 +222,22 @@ func (o *option[T]) UnwrapOrDefault() T {
 	var def T
 
 	return def
+}
+
+func (o *option[T]) AsOkOr(err error) Result[T] {
+	if o.ok {
+		return Ok[T](o.val)
+	}
+
+	return Err[T](err)
+}
+
+func (o *option[T]) AsOkOrElse(f func() error) Result[T] {
+	if o.ok {
+		return Ok[T](o.val)
+	}
+
+	return Err[T](f())
 }
 
 func (o *option[T]) Inspect(f func(T)) Option[T] {

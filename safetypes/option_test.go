@@ -1,6 +1,7 @@
 package st
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"testing"
@@ -401,6 +402,56 @@ func TestOption_UnwrapOrDefault(t *testing.T) {
 		os := newNone[string]()
 
 		assert.Empty(t, os.UnwrapOrDefault())
+	})
+}
+
+func TestAsOkOr(t *testing.T) {
+	t.Run("some", func(t *testing.T) {
+		val := fake.Int()
+		o := newSome[int](val)
+
+		expected := Ok[int](val)
+
+		assert.Equal(t, expected, o.AsOkOr(errors.New(fake.RandomStringWithLength(8))))
+	})
+
+	t.Run("none", func(t *testing.T) {
+		o := newNone[int]()
+		err := errors.New(fake.RandomStringWithLength(8))
+
+		expected := Err[int](err)
+
+		assert.Equal(t, expected, o.AsOkOr(err))
+	})
+}
+
+func TestAsOkOrElse(t *testing.T) {
+	t.Run("some", func(t *testing.T) {
+		val := fake.Int()
+		o := newSome[int](val)
+
+		f := func() error {
+			assert.Fail(t, "should not be called")
+
+			return errors.New(fake.RandomStringWithLength(8))
+		}
+
+		expected := Ok[int](val)
+
+		assert.Equal(t, expected, o.AsOkOrElse(f))
+	})
+
+	t.Run("none", func(t *testing.T) {
+		o := newNone[int]()
+		err := errors.New(fake.RandomStringWithLength(8))
+
+		f := func() error {
+			return err
+		}
+
+		expected := Err[int](err)
+
+		assert.Equal(t, expected, o.AsOkOrElse(f))
 	})
 }
 

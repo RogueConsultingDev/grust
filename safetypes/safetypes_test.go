@@ -11,56 +11,6 @@ import (
 
 var fake = faker.NewWithSeedInt64(time.Now().UnixNano())
 
-func TestAsOkOr(t *testing.T) {
-	t.Run("some", func(t *testing.T) {
-		value := fake.Int()
-		s := Some(value)
-
-		expected := Ok[int](value)
-
-		assert.Equal(t, expected, AsOkOr(s, errors.New(fake.RandomStringWithLength(8))))
-	})
-
-	t.Run("none", func(t *testing.T) {
-		n := OptionOf(0)
-		err := errors.New(fake.RandomStringWithLength(8))
-
-		expected := Err[int](err)
-
-		assert.Equal(t, expected, AsOkOr(n, err))
-	})
-}
-
-func TestAsOkOrElse(t *testing.T) {
-	t.Run("some", func(t *testing.T) {
-		value := fake.Int()
-		s := Some(value)
-
-		f := func() error {
-			assert.Fail(t, "should not be called")
-
-			return errors.New(fake.RandomStringWithLength(8))
-		}
-
-		expected := Ok[int](value)
-
-		assert.Equal(t, expected, AsOkOrElse(s, f))
-	})
-
-	t.Run("none", func(t *testing.T) {
-		n := OptionOf(0)
-		err := errors.New(fake.RandomStringWithLength(8))
-
-		f := func() error {
-			return err
-		}
-
-		expected := Err[int](err)
-
-		assert.Equal(t, expected, AsOkOrElse(n, f))
-	})
-}
-
 func TestAsOptionValue(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		value := fake.Int()
