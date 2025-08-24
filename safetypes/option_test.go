@@ -889,3 +889,21 @@ func TestOption_String(t *testing.T) {
 		assert.Equal(t, expected, o.String())
 	})
 }
+
+func newSome[T any](val T) *option[T] {
+	o, ok := Some(val).(*option[T])
+	if !ok {
+		panic("expected *option[T]")
+	}
+
+	return o
+}
+
+func newNone[T any]() *option[T] {
+	o, ok := None[T]().(*option[T])
+	if !ok {
+		panic("expected *option[T]")
+	}
+
+	return o
+}

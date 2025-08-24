@@ -73,18 +73,26 @@ type Option[T any] interface {
 
 // None creates a None variant of Option.
 func None[T any]() Option[T] {
-	return newNone[T]()
+	var v T
+
+	return &option[T]{
+		ok:  false,
+		val: v,
+	}
 }
 
 // Some creates a Some variant of Option from the value.
 func Some[T any](val T) Option[T] {
-	return newSome[T](val)
+	return &option[T]{
+		ok:  true,
+		val: val,
+	}
 }
 
 // OptionOf creates an Option from the given value.
 func OptionOf[T any](val T) Option[T] {
 	if reflect.ValueOf(&val).Elem().IsZero() {
-		return newNone[T]()
+		return None[T]()
 	}
 
 	return Some(val)
@@ -94,7 +102,7 @@ func OptionOf[T any](val T) Option[T] {
 // (if None).
 func MapOption[T any, U any](opt Option[T], f func(T) U) Option[U] {
 	if opt.IsNone() {
-		return newNone[U]()
+		return None[U]()
 	}
 
 	return Some(f(opt.Unwrap()))
@@ -122,7 +130,7 @@ func MapOptionOrElse[T any, U any](opt Option[T], factory func() U, f func(T) U)
 // And returns None if the option is None, otherwise returns `optb`.
 func And[T any, U any](opt Option[T], other Option[U]) Option[U] {
 	if opt.IsNone() {
-		return newNone[U]()
+		return None[U]()
 	}
 
 	return other
@@ -131,26 +139,10 @@ func And[T any, U any](opt Option[T], other Option[U]) Option[U] {
 // AndThen returns None if the option is None, otherwise calls `f` with the wrapped value and returns the result.
 func AndThen[T any, U any](opt Option[T], f func(T) Option[U]) Option[U] {
 	if opt.IsNone() {
-		return newNone[U]()
+		return None[U]()
 	}
 
 	return f(opt.Unwrap())
-}
-
-func newSome[T any](val T) *option[T] {
-	return &option[T]{
-		ok:  true,
-		val: val,
-	}
-}
-
-func newNone[T any]() *option[T] {
-	var v T
-
-	return &option[T]{
-		ok:  false,
-		val: v,
-	}
 }
 
 type option[T any] struct {
@@ -253,7 +245,7 @@ func (o *option[T]) Filter(f func(T) bool) Option[T] {
 		return o
 	}
 
-	return newNone[T]()
+	return None[T]()
 }
 
 func (o *option[T]) Or(other Option[T]) Option[T] {
@@ -281,7 +273,7 @@ func (o *option[T]) Xor(other Option[T]) Option[T] {
 		return other
 	}
 
-	return newNone[T]()
+	return None[T]()
 }
 
 func (o *option[T]) Insert(val T) *T {
@@ -347,7 +339,7 @@ func (o *option[T]) TakeIf(f func(T) bool) Option[T] {
 		return &res
 	}
 
-	return newNone[T]()
+	return None[T]()
 }
 
 func (o *option[T]) String() string {
