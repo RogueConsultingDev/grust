@@ -1,16 +1,12 @@
-package result
+package st
 
 import (
 	"fmt"
 	"strconv"
 	"testing"
-	"time"
 
-	"github.com/jaswdr/faker/v2"
 	"github.com/stretchr/testify/assert"
 )
-
-var fake = faker.NewWithSeedInt64(time.Now().UnixNano())
 
 type MockError struct {
 	e string
@@ -28,7 +24,7 @@ func TestFrom_ReturnsNewResultFromArgs(t *testing.T) {
 			return v, nil
 		}
 
-		res := Of(f())
+		res := ResultOf(f())
 
 		assert.True(t, res.IsOk())
 	})
@@ -41,20 +37,20 @@ func TestFrom_ReturnsNewResultFromArgs(t *testing.T) {
 			return v, err
 		}
 
-		res := Of(f())
+		res := ResultOf(f())
 
 		assert.True(t, res.IsErr())
 	})
 }
 
-func TestMap_ReturnsANewResultWithMappedValue(t *testing.T) {
+func TestMapResult_ReturnsANewResultWithMapResultpedValue(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		value := fake.Int()
 		o := Ok[int, error](value)
 
 		expected := Ok[string, error](strconv.Itoa(value))
 
-		assert.Equal(t, expected, Map(o, strconv.Itoa))
+		assert.Equal(t, expected, MapResult(o, strconv.Itoa))
 	})
 
 	t.Run("err", func(t *testing.T) {
@@ -69,11 +65,11 @@ func TestMap_ReturnsANewResultWithMappedValue(t *testing.T) {
 
 		expected := errT[int, error]{err}
 
-		assert.Equal(t, expected, Map(e, f))
+		assert.Equal(t, expected, MapResult(e, f))
 	})
 }
 
-func TestMapOr_ReturnsTheMappedValueOrDefault(t *testing.T) {
+func TestMapResultOr_ReturnsTheMapResultpedValueOrDefault(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		value := fake.Int()
 		o := Ok[int, error](value)
@@ -82,7 +78,7 @@ func TestMapOr_ReturnsTheMappedValueOrDefault(t *testing.T) {
 
 		expected := strconv.Itoa(value)
 
-		assert.Equal(t, expected, MapOr(o, def, strconv.Itoa))
+		assert.Equal(t, expected, MapResultOr(o, def, strconv.Itoa))
 	})
 
 	t.Run("err", func(t *testing.T) {
@@ -96,11 +92,11 @@ func TestMapOr_ReturnsTheMappedValueOrDefault(t *testing.T) {
 			return ""
 		}
 
-		assert.Equal(t, def, MapOr(e, def, f))
+		assert.Equal(t, def, MapResultOr(e, def, f))
 	})
 }
 
-func TestMapOrElse_ReturnsTheMappedValueOrCallsDefaultFactory(t *testing.T) {
+func TestMapResultOrElse_ReturnsTheMapResultpedValueOrCallsDefaultFactory(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		value := fake.Int()
 		o := Ok[int, error](value)
@@ -113,7 +109,7 @@ func TestMapOrElse_ReturnsTheMappedValueOrCallsDefaultFactory(t *testing.T) {
 
 		expected := strconv.Itoa(value)
 
-		assert.Equal(t, expected, MapOrElse(o, factory, strconv.Itoa))
+		assert.Equal(t, expected, MapResultOrElse(o, factory, strconv.Itoa))
 	})
 
 	t.Run("err", func(t *testing.T) {
@@ -130,11 +126,11 @@ func TestMapOrElse_ReturnsTheMappedValueOrCallsDefaultFactory(t *testing.T) {
 			return def
 		}
 
-		assert.Equal(t, def, MapOrElse(e, factory, mapper))
+		assert.Equal(t, def, MapResultOrElse(e, factory, mapper))
 	})
 }
 
-func TestMapErr_ReturnsANewResultWithMappedValue(t *testing.T) {
+func TestMapResultErr_ReturnsANewResultWithMapResultpedValue(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		value := fake.Int()
 		o := Ok[int, error](value)
@@ -147,7 +143,7 @@ func TestMapErr_ReturnsANewResultWithMappedValue(t *testing.T) {
 
 		expected := ok[int, *MockError]{value}
 
-		assert.Equal(t, expected, MapErr(o, f))
+		assert.Equal(t, expected, MapResultErr(o, f))
 	})
 
 	t.Run("err", func(t *testing.T) {
@@ -163,6 +159,6 @@ func TestMapErr_ReturnsANewResultWithMappedValue(t *testing.T) {
 
 		expected := errT[any, *MockError]{err: newE}
 
-		assert.Equal(t, expected, MapErr(e, f))
+		assert.Equal(t, expected, MapResultErr(e, f))
 	})
 }

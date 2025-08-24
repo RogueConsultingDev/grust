@@ -1,15 +1,11 @@
-package option
+package st
 
 import (
 	"strconv"
 	"testing"
-	"time"
 
-	"github.com/jaswdr/faker/v2"
 	"github.com/stretchr/testify/assert"
 )
-
-var fake = faker.NewWithSeedInt64(time.Now().UnixNano())
 
 func TestFrom_ReturnsNewOptionFromArgs(t *testing.T) {
 	type S struct {
@@ -17,79 +13,79 @@ func TestFrom_ReturnsNewOptionFromArgs(t *testing.T) {
 	}
 
 	t.Run("some", func(t *testing.T) {
-		res1 := Of(fake.IntBetween(1, 100))
+		res1 := OptionOf(fake.IntBetween(1, 100))
 		assert.True(t, res1.IsSome())
 
-		res2 := Of(fake.Float(2, 1, 100))
+		res2 := OptionOf(fake.Float(2, 1, 100))
 		assert.True(t, res2.IsSome())
 
-		res3 := Of(fake.RandomStringWithLength(8))
+		res3 := OptionOf(fake.RandomStringWithLength(8))
 		assert.True(t, res3.IsSome())
 
-		res4 := Of(true)
+		res4 := OptionOf(true)
 		assert.True(t, res4.IsSome())
 
-		res5 := Of(S{value: 1})
+		res5 := OptionOf(S{value: 1})
 		assert.True(t, res5.IsSome())
 
 		zeroInt := 0
-		res6 := Of(&zeroInt)
+		res6 := OptionOf(&zeroInt)
 		assert.True(t, res6.IsSome())
 
 		zeroStr := ""
-		res7 := Of(&zeroStr)
+		res7 := OptionOf(&zeroStr)
 		assert.True(t, res7.IsSome())
 
 		zeroS := S{} //nolint:exhaustruct  // We want the zero value
-		res8 := Of(&zeroS)
+		res8 := OptionOf(&zeroS)
 		assert.True(t, res8.IsSome())
 	})
 
 	t.Run("none", func(t *testing.T) {
-		res1 := Of(0)
+		res1 := OptionOf(0)
 		assert.True(t, res1.IsNone())
 
-		res2 := Of(0.0)
+		res2 := OptionOf(0.0)
 		assert.True(t, res2.IsNone())
 
-		res3 := Of("")
+		res3 := OptionOf("")
 		assert.True(t, res3.IsNone())
 
-		res4 := Of(false)
+		res4 := OptionOf(false)
 		assert.True(t, res4.IsNone())
 
-		res5 := Of(S{}) //nolint:exhaustruct  // We want the zero value
+		res5 := OptionOf(S{}) //nolint:exhaustruct  // We want the zero value
 		assert.True(t, res5.IsNone())
 
-		res6 := Of((*string)(nil))
+		res6 := OptionOf((*string)(nil))
 		assert.True(t, res6.IsNone())
 	})
 }
 
-func TestMap_ReturnsANewOptionWithMappedValue(t *testing.T) {
+func TestMapOption_ReturnsANewOptionWithMapOptionpedValue(t *testing.T) {
 	t.Run("some", func(t *testing.T) {
 		val := fake.Int()
 		s := Some(val)
 
 		expected := Some(strconv.Itoa(val))
 
-		assert.Equal(t, expected, Map(s, strconv.Itoa))
+		assert.Equal(t, expected, MapOption(s, strconv.Itoa))
 	})
 
 	t.Run("none", func(t *testing.T) {
-		n := None()
+		n := None[int]()
 
-		f := func(any) int {
+		f := func(int) int {
 			assert.Fail(t, "mapper should not have been called")
 
 			return 0
 		}
 
-		assert.Equal(t, none[int]{}, Map(n, f))
+		assert.Equal(t, none[int]{}, MapOption(n, f))
 	})
 }
 
-func TestMapOr_ReturnsTheMappedValueOrDefault(t *testing.T) {
+func TestMapOptionOr_ReturnsTheMapOptionpedValueOrDefault(t *testing.T) {
 	t.Run("some", func(t *testing.T) {
 		val := fake.Int()
 		s := Some(val)
@@ -98,24 +94,24 @@ func TestMapOr_ReturnsTheMappedValueOrDefault(t *testing.T) {
 
 		expected := strconv.Itoa(val)
 
-		assert.Equal(t, expected, MapOr(s, def, strconv.Itoa))
+		assert.Equal(t, expected, MapOptionOr(s, def, strconv.Itoa))
 	})
 
 	t.Run("none", func(t *testing.T) {
-		n := None()
+		n := None[int]()
 
 		def := fake.RandomStringWithLength(9)
-		f := func(any) string {
+		f := func(int) string {
 			assert.Fail(t, "mapper should not have been called")
 
 			return ""
 		}
 
-		assert.Equal(t, def, MapOr(n, def, f))
+		assert.Equal(t, def, MapOptionOr(n, def, f))
 	})
 }
 
-func TestMapOrElse_ReturnsTheMappedValueOrCallsDefaultFactory(t *testing.T) {
+func TestMapOptionOrElse_ReturnsTheMapOptionpedValueOrCallsDefaultFactory(t *testing.T) {
 	t.Run("some", func(t *testing.T) {
 		val := fake.Int()
 		s := Some(val)
@@ -128,13 +124,13 @@ func TestMapOrElse_ReturnsTheMappedValueOrCallsDefaultFactory(t *testing.T) {
 
 		expected := strconv.Itoa(val)
 
-		assert.Equal(t, expected, MapOrElse(s, factory, strconv.Itoa))
+		assert.Equal(t, expected, MapOptionOrElse(s, factory, strconv.Itoa))
 	})
 
 	t.Run("none", func(t *testing.T) {
-		n := None()
+		n := None[int]()
 
-		mapper := func(any) string {
+		mapper := func(int) string {
 			assert.Fail(t, "mapper should not have been called")
 
 			return ""
@@ -144,7 +140,7 @@ func TestMapOrElse_ReturnsTheMappedValueOrCallsDefaultFactory(t *testing.T) {
 			return def
 		}
 
-		assert.Equal(t, def, MapOrElse(n, factory, mapper))
+		assert.Equal(t, def, MapOptionOrElse(n, factory, mapper))
 	})
 }
 
@@ -159,7 +155,7 @@ func TestAnd_ReturnsOtherOrNone(t *testing.T) {
 	})
 
 	t.Run("none", func(t *testing.T) {
-		n := None()
+		n := None[int]()
 
 		other := Some(fake.RandomStringWithLength(8))
 
@@ -167,7 +163,7 @@ func TestAnd_ReturnsOtherOrNone(t *testing.T) {
 	})
 }
 
-func TestAndThen_ReturnsMappedOrNone(t *testing.T) {
+func TestAndThen_ReturnsMapOptionpedOrNone(t *testing.T) {
 	t.Run("some", func(t *testing.T) {
 		val := fake.Int()
 		s := Some(val)
@@ -183,9 +179,9 @@ func TestAndThen_ReturnsMappedOrNone(t *testing.T) {
 	})
 
 	t.Run("none", func(t *testing.T) {
-		n := None()
+		n := None[int]()
 
-		f := func(_ any) Option[string] {
+		f := func(int) Option[string] {
 			assert.Fail(t, "mapper should not have been called")
 
 			return none[string]{}

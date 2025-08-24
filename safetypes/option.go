@@ -1,5 +1,4 @@
-// Package option implements https://doc.rust-lang.org/std/option/enum.Option.html
-package option
+package st
 
 import (
 	"fmt"
@@ -26,8 +25,8 @@ type Option[T any] interface {
 	fmt.Stringer
 }
 
-// Of creates an Option from the given value.
-func Of[T any](val T) Option[T] {
+// OptionOf creates an Option from the given value.
+func OptionOf[T any](val T) Option[T] {
 	if reflect.ValueOf(&val).Elem().IsZero() {
 		return none[T]{}
 	}
@@ -35,8 +34,9 @@ func Of[T any](val T) Option[T] {
 	return Some(val)
 }
 
-// Map maps an Option<T> to Option<U> by applying a function to a contained value (if Some) or returns None (if None).
-func Map[T any, U any](opt Option[T], f func(T) U) Option[U] {
+// MapOption maps an Option<T> to Option<U> by applying a function to a contained value (if Some) or returns None
+// (if None).
+func MapOption[T any, U any](opt Option[T], f func(T) U) Option[U] {
 	s, ok := opt.(some[T])
 	if !ok {
 		return none[U]{}
@@ -45,8 +45,8 @@ func Map[T any, U any](opt Option[T], f func(T) U) Option[U] {
 	return Some(f(s.val))
 }
 
-// MapOr returns the provided default result (if None), or applies a function to the contained value (if Some).
-func MapOr[T any, U any](opt Option[T], def U, f func(T) U) U {
+// MapOptionOr returns the provided default result (if None), or applies a function to the contained value (if Some).
+func MapOptionOr[T any, U any](opt Option[T], def U, f func(T) U) U {
 	s, ok := opt.(some[T])
 	if !ok {
 		return def
@@ -55,9 +55,9 @@ func MapOr[T any, U any](opt Option[T], def U, f func(T) U) U {
 	return f(s.val)
 }
 
-// MapOrElse computes a default function result (if None), or applies a different function to the contained value (if
-// Some).
-func MapOrElse[T any, U any](opt Option[T], factory func() U, f func(T) U) U {
+// MapOptionOrElse computes a default function result (if None), or applies a different function to the contained value
+// (if Some).
+func MapOptionOrElse[T any, U any](opt Option[T], factory func() U, f func(T) U) U {
 	s, ok := opt.(some[T])
 	if !ok {
 		return factory()

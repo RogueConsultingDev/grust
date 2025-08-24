@@ -1,5 +1,4 @@
-// Package result implements https://doc.rust-lang.org/std/result/enum.Result.html
-package result
+package st
 
 import (
 	"fmt"
@@ -29,8 +28,8 @@ type Result[T any, E error] interface {
 	fmt.Stringer
 }
 
-// Of creates a Result from the given value and error.
-func Of[T any, E error](val T, err E) Result[T, E] {
+// ResultOf creates a Result from the given value and error.
+func ResultOf[T any, E error](val T, err E) Result[T, E] {
 	if !reflect.ValueOf(&err).Elem().IsNil() {
 		return errT[T, E]{
 			err: err,
@@ -42,9 +41,9 @@ func Of[T any, E error](val T, err E) Result[T, E] {
 	}
 }
 
-// Map maps a Result<T, E> to Result<U, E> by applying a function to a contained Ok value, leaving an Err value
+// MapResult maps a Result<T, E> to Result<U, E> by applying a function to a contained Ok value, leaving an Err value
 // untouched.
-func Map[T any, U any, E error](res Result[T, E], f func(T) U) Result[U, E] {
+func MapResult[T any, U any, E error](res Result[T, E], f func(T) U) Result[U, E] {
 	s, isOk := res.(ok[T, E])
 	if !isOk {
 		return errT[U, E]{res.UnwrapErr()}
@@ -55,8 +54,8 @@ func Map[T any, U any, E error](res Result[T, E], f func(T) U) Result[U, E] {
 	return ok[U, E]{val}
 }
 
-// MapOr returns the provided default (if Err), or applies a function to the contained value (if Ok).
-func MapOr[T any, U any, E error](res Result[T, E], def U, f func(T) U) U {
+// MapResultOr returns the provided default (if Err), or applies a function to the contained value (if Ok).
+func MapResultOr[T any, U any, E error](res Result[T, E], def U, f func(T) U) U {
 	s, isOk := res.(ok[T, E])
 	if !isOk {
 		return def
@@ -65,9 +64,9 @@ func MapOr[T any, U any, E error](res Result[T, E], def U, f func(T) U) U {
 	return f(s.val)
 }
 
-// MapOrElse maps a Result<T, E> to U by applying fallback function default to a contained Err value, or function f to a
-// contained Ok value.
-func MapOrElse[T any, U any, E error](
+// MapResultOrElse maps a Result<T, E> to U by applying fallback function default to a contained Err value, or function
+// f to a contained Ok value.
+func MapResultOrElse[T any, U any, E error](
 	res Result[T, E],
 	factory func() U,
 	mapper func(T) U,
@@ -80,9 +79,9 @@ func MapOrElse[T any, U any, E error](
 	return mapper(s.val)
 }
 
-// MapErr maps a Result<T, E> to Result<T, F> by applying a function to a contained Err value, leaving an Ok value
+// MapResultErr maps a Result<T, E> to Result<T, F> by applying a function to a contained Err value, leaving an Ok value
 // untouched.
-func MapErr[T any, E error, F error](res Result[T, E], f func(E) F) Result[T, F] {
+func MapResultErr[T any, E error, F error](res Result[T, E], f func(E) F) Result[T, F] {
 	s, isOk := res.(ok[T, E])
 	if isOk {
 		return (ok[T, F])(s)

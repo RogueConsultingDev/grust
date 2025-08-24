@@ -51,7 +51,7 @@ linters:
       - linters:  # Returning "any" is the whole point
           - interfacebloat
           - ireturn
-        path: safetypes/.*/.*\.go
+        path: safetypes/.*\.go
       - linters:
           - govet
         text: 'shadow: declaration of "(err|ctx)" shadows declaration at'

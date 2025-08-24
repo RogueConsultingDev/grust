@@ -1,5 +1,4 @@
-// Package result implements https://doc.rust-lang.org/std/result/enum.Result.html
-package result
+package st
 
 import "fmt"
 

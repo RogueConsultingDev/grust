@@ -1,4 +1,4 @@
-package option
+package st
 
 import (
 	"fmt"
@@ -9,27 +9,27 @@ import (
 )
 
 func TestNone_ReturnsNewNoneOption(t *testing.T) {
-	res := None()
+	res := None[int]()
 
-	n, ok := res.(none[any])
+	n, ok := res.(none[int])
 	require.True(t, ok, "result should be a none: %#v", res)
 
-	assert.Equal(t, none[any]{}, n)
+	assert.Equal(t, none[int]{}, n)
 }
 
 func TestNone_IsNone(t *testing.T) {
-	n := None()
+	n := None[int]()
 
 	assert.True(t, n.IsNone())
 }
 
 func TestNone_IsNoneOr(t *testing.T) {
-	n := None()
+	n := None[int]()
 
 	for _, res := range []bool{true, false} {
 		name := fmt.Sprintf("predicate returns %v", res)
 		t.Run(name, func(t *testing.T) {
-			f := func(_ any) bool {
+			f := func(int) bool {
 				// The predicate should _not_ be called, there's just no point in doing so.
 				assert.Fail(t, "predicate should not have been called")
 
@@ -42,18 +42,18 @@ func TestNone_IsNoneOr(t *testing.T) {
 }
 
 func TestNone_IsSome(t *testing.T) {
-	n := None()
+	n := None[int]()
 
 	assert.False(t, n.IsSome())
 }
 
 func TestNone_IsSomeAnd(t *testing.T) {
-	n := None()
+	n := None[int]()
 
 	for _, res := range []bool{true, false} {
 		name := fmt.Sprintf("predicate returns %v", res)
 		t.Run(name, func(t *testing.T) {
-			f := func(_ any) bool {
+			f := func(int) bool {
 				// The predicate should _not_ be called, there's just no point in doing so.
 				assert.Fail(t, "predicate should not have been called")
 
@@ -66,7 +66,7 @@ func TestNone_IsSomeAnd(t *testing.T) {
 }
 
 func TestNone_Expect(t *testing.T) {
-	s := None()
+	s := None[int]()
 
 	msg := fake.RandomStringWithLength(8)
 	assert.PanicsWithError(t, msg, func() {
@@ -75,7 +75,7 @@ func TestNone_Expect(t *testing.T) {
 }
 
 func TestNone_Unwrap(t *testing.T) {
-	s := None()
+	s := None[int]()
 
 	assert.PanicsWithError(t, "called `Option.Unwrap()` on a `None` value", func() {
 		s.Unwrap()
@@ -83,17 +83,17 @@ func TestNone_Unwrap(t *testing.T) {
 }
 
 func TestNone_UnwrapOr(t *testing.T) {
-	s := None()
+	s := None[string]()
 	def := fake.RandomStringWithLength(8)
 
 	assert.Equal(t, def, s.UnwrapOr(def))
 }
 
 func TestNone_UnwrapOrElse(t *testing.T) {
-	s := None()
+	s := None[string]()
 
 	def := fake.RandomStringWithLength(8)
-	f := func() any {
+	f := func() string {
 		return def
 	}
 
@@ -114,9 +114,9 @@ func TestNone_UnwrapOrDefault(t *testing.T) {
 }
 
 func TestNone_Inspect(t *testing.T) {
-	n := None()
+	n := None[int]()
 
-	f := func(_ any) {
+	f := func(int) {
 		assert.Fail(t, "predicate should not have been called")
 	}
 
@@ -124,12 +124,12 @@ func TestNone_Inspect(t *testing.T) {
 }
 
 func TestNone_Filter(t *testing.T) {
-	n := None()
+	n := None[int]()
 
 	for _, res := range []bool{true, false} {
 		name := fmt.Sprintf("predicate returns %v", res)
 		t.Run(name, func(t *testing.T) {
-			f := func(_ any) bool {
+			f := func(int) bool {
 				// The predicate should _not_ be called, there's just no point in doing so.
 				assert.Fail(t, "predicate should not have been called")
 

@@ -1,4 +1,4 @@
-package option
+package st
 
 import (
 	"errors"
@@ -7,8 +7,8 @@ import (
 type none[T any] struct{}
 
 // None creates a None variant of Option.
-func None() Option[any] {
-	return none[any]{}
+func None[T any]() Option[T] {
+	return none[T]{}
 }
 
 func (n none[T]) IsNone() bool {
