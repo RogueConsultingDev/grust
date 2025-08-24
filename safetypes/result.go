@@ -15,14 +15,27 @@ type Result[T any, E error] interface {
 	IsErr() bool
 	// IsErrAnd returns `true` if the result is Err and the value inside of it matches a predicate.
 	IsErrAnd(f func(error) bool) bool
+	// Inspect calls a function with a reference to the contained value if Ok. Returns the original result.
 	Inspect(f func(*T)) Result[T, E]
+	// InspectErr calls a function with a reference to the contained value if Err. Returns the original result.
 	InspectErr(f func(*E)) Result[T, E]
+	// Expect returns the contained Ok value, consuming the self value. Panics if the value is an Err, with a panic
+	// message including the passed message, and the content of the Err.
 	Expect(msg string) T
+	// ExpectErr returns the contained Err value, consuming the self value. Panics if the value is an Ok, with a panic
+	// message including the passed message, and the content of the Ok.
 	ExpectErr(msg string) E
+	// Unwrap returns the contained Ok value, consuming the self value. Panics if the value is an Err, with a panic
+	// message provided by the Err's value.
 	Unwrap() T
+	// UnwrapOr returns the contained Ok value or a provided default.
 	UnwrapOr(def T) T
+	// UnwrapOrElse returns the contained Ok value or computes it from a closure.
 	UnwrapOrElse(f func() T) T
+	// UnwrapOrDefault returns the contained Ok value or a default.
 	UnwrapOrDefault() T
+	// UnwrapErr returns the contained Err value, consuming the self value. Panics if the value is an Ok, with a custom
+	// panic message provided by the Ok's value.
 	UnwrapErr() E
 
 	fmt.Stringer
