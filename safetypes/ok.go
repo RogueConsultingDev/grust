@@ -67,6 +67,16 @@ func (o *ok[T]) UnwrapErr() error {
 	panic(fmt.Errorf("called `Result.UnwrapErr()` on an `Ok` value: %v", o.val))
 }
 
+// AsOptionValue converts a Result to a Some when res is result.Ok or None when res is result.Err.
+func (o *ok[T]) AsOptionValue() Option[T] {
+	return Some(o.val)
+}
+
+// AsOptionErr converts a Result to a Some when res is result.Err or None when res is result.Ok.
+func (o *ok[T]) AsOptionErr() Option[error] {
+	return None[error]()
+}
+
 func (o *ok[T]) WrapErr(_ string) Result[T] {
 	return o
 }

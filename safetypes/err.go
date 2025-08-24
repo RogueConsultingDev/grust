@@ -69,6 +69,16 @@ func (e *errT[T]) UnwrapErr() error {
 	return e.err
 }
 
+// AsOptionValue converts a Result to a Some when res is result.Ok or None when res is result.Err.
+func (e *errT[T]) AsOptionValue() Option[T] {
+	return None[T]()
+}
+
+// AsOptionErr converts a Result to a Some when res is result.Err or None when res is result.Ok.
+func (e *errT[T]) AsOptionErr() Option[error] {
+	return Some[error](e.err)
+}
+
 func (e *errT[T]) WrapErr(msg string) Result[T] {
 	return Err[T](fmt.Errorf("%s: %w", msg, e.err))
 }

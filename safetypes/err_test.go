@@ -1,6 +1,7 @@
 package st
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -170,6 +171,24 @@ func TestErr_UnwrapErr(t *testing.T) {
 	e := Err[any](err)
 
 	assert.Equal(t, err, e.UnwrapErr())
+}
+
+func TestErr_AsOptionValue(t *testing.T) {
+	err := errors.New(fake.RandomStringWithLength(8))
+	e := Err[int](err)
+
+	expected := None[int]()
+
+	assert.Equal(t, expected, e.AsOptionValue())
+}
+
+func TestErr_AsOptionErr(t *testing.T) {
+	err := errors.New(fake.RandomStringWithLength(8))
+	e := Err[int](err)
+
+	expected := Some(err)
+
+	assert.Equal(t, expected, e.AsOptionErr())
 }
 
 func TestErr_WrapErr(t *testing.T) {

@@ -37,6 +37,10 @@ type Result[T any] interface {
 	// UnwrapErr returns the contained Err value, consuming the self value. Panics if the value is an Ok, with a custom
 	// panic message provided by the Ok's value.
 	UnwrapErr() error
+	// AsOptionValue converts a Result to a Some when res is result.Ok or None when res is result.Err.
+	AsOptionValue() Option[T]
+	// AsOptionErr converts a Result to a Some when res is result.Err or None when res is result.Ok.
+	AsOptionErr() Option[error]
 
 	// WrapErr wraps the error of an Err, leaving Ok untouched
 	WrapErr(msg string) Result[T]

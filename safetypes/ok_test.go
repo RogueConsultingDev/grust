@@ -170,6 +170,22 @@ func TestOk_UnwrapErr(t *testing.T) {
 	})
 }
 
+func TestOk_AsOptionValue(t *testing.T) {
+	value := fake.Int()
+	o := Ok[int](value)
+
+	assert.Equal(t, Some(value), o.AsOptionValue())
+}
+
+func TestOk_AsOptionErr(t *testing.T) {
+	value := fake.Int()
+	o := Ok[int](value)
+
+	expected := None[error]()
+
+	assert.Equal(t, expected, o.AsOptionErr())
+}
+
 func TestOk_WrapErr(t *testing.T) {
 	value := fake.Int()
 	o := Ok[int](value)
