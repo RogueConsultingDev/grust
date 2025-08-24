@@ -44,12 +44,12 @@ type Result[T any, E error] interface {
 // ResultOf creates a Result from the given value and error.
 func ResultOf[T any, E error](val T, err E) Result[T, E] {
 	if !reflect.ValueOf(&err).Elem().IsNil() {
-		return errT[T, E]{
+		return &errT[T, E]{
 			err: err,
 		}
 	}
 
-	return ok[T, E]{
+	return &ok[T, E]{
 		val: val,
 	}
 }
@@ -57,19 +57,19 @@ func ResultOf[T any, E error](val T, err E) Result[T, E] {
 // MapResult maps a Result<T, E> to Result<U, E> by applying a function to a contained Ok value, leaving an Err value
 // untouched.
 func MapResult[T any, U any, E error](res Result[T, E], f func(T) U) Result[U, E] {
-	s, isOk := res.(ok[T, E])
+	s, isOk := res.(*ok[T, E])
 	if !isOk {
-		return errT[U, E]{res.UnwrapErr()}
+		return &errT[U, E]{res.UnwrapErr()}
 	}
 
 	val := f(s.val)
 
-	return ok[U, E]{val}
+	return &ok[U, E]{val}
 }
 
 // MapResultOr returns the provided default (if Err), or applies a function to the contained value (if Ok).
 func MapResultOr[T any, U any, E error](res Result[T, E], def U, f func(T) U) U {
-	s, isOk := res.(ok[T, E])
+	s, isOk := res.(*ok[T, E])
 	if !isOk {
 		return def
 	}
@@ -84,7 +84,7 @@ func MapResultOrElse[T any, U any, E error](
 	factory func() U,
 	mapper func(T) U,
 ) U {
-	s, isOk := res.(ok[T, E])
+	s, isOk := res.(*ok[T, E])
 	if !isOk {
 		return factory()
 	}
@@ -95,10 +95,10 @@ func MapResultOrElse[T any, U any, E error](
 // MapResultErr maps a Result<T, E> to Result<T, F> by applying a function to a contained Err value, leaving an Ok value
 // untouched.
 func MapResultErr[T any, E error, F error](res Result[T, E], f func(E) F) Result[T, F] {
-	s, isOk := res.(ok[T, E])
+	s, isOk := res.(*ok[T, E])
 	if isOk {
-		return (ok[T, F])(s)
+		return (*ok[T, F])(s)
 	}
 
-	return errT[T, F]{f(res.UnwrapErr())}
+	return &errT[T, F]{f(res.UnwrapErr())}
 }

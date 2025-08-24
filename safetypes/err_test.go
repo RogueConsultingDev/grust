@@ -12,7 +12,7 @@ func TestErr_ReturnsNewErrResult(t *testing.T) {
 
 	res := Err[any, error](err)
 
-	expected := errT[any, error]{
+	expected := &errT[any, error]{
 		err: err,
 	}
 	assert.Equal(t, expected, res)

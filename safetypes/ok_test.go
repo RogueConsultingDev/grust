@@ -12,7 +12,7 @@ func TestOK_ReturnsNewOkResult(t *testing.T) {
 
 	res := Ok[string, error](value)
 
-	expected := ok[string, error]{
+	expected := &ok[string, error]{
 		val: value,
 	}
 	assert.Equal(t, expected, res)

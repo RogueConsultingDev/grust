@@ -63,7 +63,7 @@ func TestMapResult_ReturnsANewResultWithMappedResultValue(t *testing.T) {
 			return 0
 		}
 
-		expected := errT[int, error]{err}
+		expected := &errT[int, error]{err}
 
 		assert.Equal(t, expected, MapResult(e, f))
 	})
@@ -141,7 +141,7 @@ func TestMapResultErr_ReturnsANewResultWithMappedResultValue(t *testing.T) {
 			return nil
 		}
 
-		expected := ok[int, *MockError]{value}
+		expected := &ok[int, *MockError]{value}
 
 		assert.Equal(t, expected, MapResultErr(o, f))
 	})
@@ -157,7 +157,7 @@ func TestMapResultErr_ReturnsANewResultWithMappedResultValue(t *testing.T) {
 			return newE
 		}
 
-		expected := errT[any, *MockError]{err: newE}
+		expected := &errT[any, *MockError]{err: newE}
 
 		assert.Equal(t, expected, MapResultErr(e, f))
 	})
