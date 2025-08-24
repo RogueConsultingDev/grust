@@ -11,10 +11,10 @@ import (
 func TestNone_ReturnsNewNoneOption(t *testing.T) {
 	res := None[int]()
 
-	n, ok := res.(none[int])
+	n, ok := res.(*none[int])
 	require.True(t, ok, "result should be a none: %#v", res)
 
-	assert.Equal(t, none[int]{}, n)
+	assert.Equal(t, none[int]{}, *n)
 }
 
 func TestNone_IsNone(t *testing.T) {
@@ -151,14 +151,14 @@ func TestNone_Or(t *testing.T) {
 	})
 
 	t.Run("other is none", func(t *testing.T) {
-		other := none[int]{}
+		other := None[int]()
 
 		assert.Equal(t, other, n.Or(other))
 	})
 }
 
 func TestNone_OrElse(t *testing.T) {
-	n := none[int]{}
+	n := None[int]()
 
 	t.Run("other is some", func(t *testing.T) {
 		other := Some(fake.Int())
@@ -171,7 +171,7 @@ func TestNone_OrElse(t *testing.T) {
 	})
 
 	t.Run("other is none", func(t *testing.T) {
-		other := none[int]{}
+		other := None[int]()
 
 		f := func() Option[int] {
 			return other
@@ -182,7 +182,7 @@ func TestNone_OrElse(t *testing.T) {
 }
 
 func TestNone_Xor(t *testing.T) {
-	n := none[int]{}
+	n := None[int]()
 
 	t.Run("other is some", func(t *testing.T) {
 		other := Some(fake.Int())
@@ -190,13 +190,13 @@ func TestNone_Xor(t *testing.T) {
 	})
 
 	t.Run("other is none", func(t *testing.T) {
-		other := none[int]{}
+		other := None[int]()
 		assert.Equal(t, n, n.Xor(other))
 	})
 }
 
 func TestNone_String(t *testing.T) {
-	n := none[int]{}
+	n := None[int]()
 
 	assert.Equal(t, "None", n.String())
 }

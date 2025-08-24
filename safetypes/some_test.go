@@ -13,10 +13,10 @@ func TestSome_ReturnsNewSomeOption(t *testing.T) {
 
 	res := Some(v)
 
-	s, ok := res.(some[string])
+	s, ok := res.(*some[string])
 	require.True(t, ok, "result should be a some[string]: %#v", res)
 
-	expected := some[string]{
+	expected := &some[string]{
 		val: v,
 	}
 	assert.Equal(t, expected, s)
@@ -165,7 +165,7 @@ func TestSome_Filter(t *testing.T) {
 			if res {
 				assert.Equal(t, s, s.Filter(f))
 			} else {
-				assert.Equal(t, none[int]{}, s.Filter(f))
+				assert.Equal(t, None[int](), s.Filter(f))
 			}
 
 			assert.True(t, called, "predicate should have been called")
@@ -201,11 +201,11 @@ func TestSome_Xor(t *testing.T) {
 
 	t.Run("other is some", func(t *testing.T) {
 		other := Some(fake.Int())
-		assert.Equal(t, none[int]{}, s.Xor(other))
+		assert.Equal(t, None[int](), s.Xor(other))
 	})
 
 	t.Run("other is none", func(t *testing.T) {
-		other := none[int]{}
+		other := None[int]()
 		assert.Equal(t, s, s.Xor(other))
 	})
 }

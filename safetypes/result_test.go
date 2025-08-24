@@ -43,7 +43,7 @@ func TestFrom_ReturnsNewResultFromArgs(t *testing.T) {
 	})
 }
 
-func TestMapResult_ReturnsANewResultWithMapResultpedValue(t *testing.T) {
+func TestMapResult_ReturnsANewResultWithMappedResultValue(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		value := fake.Int()
 		o := Ok[int, error](value)
@@ -69,7 +69,7 @@ func TestMapResult_ReturnsANewResultWithMapResultpedValue(t *testing.T) {
 	})
 }
 
-func TestMapResultOr_ReturnsTheMapResultpedValueOrDefault(t *testing.T) {
+func TestMapResultOr_ReturnsTheMappedResultValueOrDefault(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		value := fake.Int()
 		o := Ok[int, error](value)
@@ -96,7 +96,7 @@ func TestMapResultOr_ReturnsTheMapResultpedValueOrDefault(t *testing.T) {
 	})
 }
 
-func TestMapResultOrElse_ReturnsTheMapResultpedValueOrCallsDefaultFactory(t *testing.T) {
+func TestMapResultOrElse_ReturnsTheMappedResultValueOrCallsDefaultFactory(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		value := fake.Int()
 		o := Ok[int, error](value)
@@ -130,7 +130,7 @@ func TestMapResultOrElse_ReturnsTheMapResultpedValueOrCallsDefaultFactory(t *tes
 	})
 }
 
-func TestMapResultErr_ReturnsANewResultWithMapResultpedValue(t *testing.T) {
+func TestMapResultErr_ReturnsANewResultWithMappedResultValue(t *testing.T) {
 	t.Run("ok", func(t *testing.T) {
 		value := fake.Int()
 		o := Ok[int, error](value)

@@ -62,7 +62,7 @@ func TestFrom_ReturnsNewOptionFromArgs(t *testing.T) {
 	})
 }
 
-func TestMapOption_ReturnsANewOptionWithMapOptionpedValue(t *testing.T) {
+func TestMapOption_ReturnsANewOptionWithMappedOptionValue(t *testing.T) {
 	t.Run("some", func(t *testing.T) {
 		val := fake.Int()
 		s := Some(val)
@@ -81,11 +81,11 @@ func TestMapOption_ReturnsANewOptionWithMapOptionpedValue(t *testing.T) {
 			return 0
 		}
 
-		assert.Equal(t, none[int]{}, MapOption(n, f))
+		assert.Equal(t, None[int](), MapOption(n, f))
 	})
 }
 
-func TestMapOptionOr_ReturnsTheMapOptionpedValueOrDefault(t *testing.T) {
+func TestMapOptionOr_ReturnsTheMappedOptionValueOrDefault(t *testing.T) {
 	t.Run("some", func(t *testing.T) {
 		val := fake.Int()
 		s := Some(val)
@@ -111,7 +111,7 @@ func TestMapOptionOr_ReturnsTheMapOptionpedValueOrDefault(t *testing.T) {
 	})
 }
 
-func TestMapOptionOrElse_ReturnsTheMapOptionpedValueOrCallsDefaultFactory(t *testing.T) {
+func TestMapOptionOrElse_ReturnsTheMappedOptionValueOrCallsDefaultFactory(t *testing.T) {
 	t.Run("some", func(t *testing.T) {
 		val := fake.Int()
 		s := Some(val)
@@ -159,11 +159,11 @@ func TestAnd_ReturnsOtherOrNone(t *testing.T) {
 
 		other := Some(fake.RandomStringWithLength(8))
 
-		assert.Equal(t, none[string]{}, And(n, other))
+		assert.Equal(t, None[string](), And(n, other))
 	})
 }
 
-func TestAndThen_ReturnsMapOptionpedOrNone(t *testing.T) {
+func TestAndThen_ReturnsMappedOptionOrNone(t *testing.T) {
 	t.Run("some", func(t *testing.T) {
 		val := fake.Int()
 		s := Some(val)
@@ -184,9 +184,9 @@ func TestAndThen_ReturnsMapOptionpedOrNone(t *testing.T) {
 		f := func(int) Option[string] {
 			assert.Fail(t, "mapper should not have been called")
 
-			return none[string]{}
+			return &none[string]{}
 		}
 
-		assert.Equal(t, none[string]{}, AndThen(n, f))
+		assert.Equal(t, None[string](), AndThen(n, f))
 	})
 }
