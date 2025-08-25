@@ -1,4 +1,4 @@
-module github.com/mathieu-lemay/grust
+module github.com/RogueConsultingDev/grust
 
 go 1.23.2
 
