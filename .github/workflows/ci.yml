@@ -1,0 +1,34 @@
+name: List and Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '>=1.23.2'
+
+      - name: Cache golangci-lint
+        uses: actions/cache@v4
+        with:
+          path: "~/.cache/golangci-lint"
+          key: "golangci-lint-v0-${{ hashFiles('go.sum') }}"
+          restore-keys: |
+            golangci-lint-v0-
+
+      - name: Run linters
+        uses: pre-commit/action@v3.0.1
+
+      - name: Run tests
+        run: |
+          go test -coverprofile=.coverage ./...

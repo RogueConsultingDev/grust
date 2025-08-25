@@ -1,0 +1,83 @@
+version: "2"
+linters:
+  default: all
+  disable:
+    - depguard
+    - err113
+    - godox
+    - paralleltest
+    - testpackage
+    - varnamelen
+    - wsl
+  settings:
+    forbidigo:
+      forbid:
+        - pattern: ^(fmt\.Print(|f|ln)|print|println)$
+          msg: Do not commit print statements.
+    funlen:
+      lines: -1 # disables line count check
+      statements: 50
+      ignore-comments: true
+    gocyclo:
+      min-complexity: 15
+    govet:
+      enable:
+        - shadow
+    nolintlint:
+      require-explanation: true
+      require-specific: false
+      allow-unused: false
+    revive:
+      confidence: 0
+    staticcheck:
+      checks:
+        - all
+        - -ST1000
+    wsl_v5:
+      default: default
+      disable:
+        - decl
+  exclusions:
+    generated: lax
+    rules:
+      - linters:
+          - dupl
+          - errcheck
+          - funlen
+          - gochecknoglobals
+          - gocyclo
+          - gosec
+        path: _test\.go
+      - linters:  # Returning "any" is the whole point
+          - interfacebloat
+          - ireturn
+        path: safetypes/.*\.go
+      - linters:
+          - govet
+        text: 'shadow: declaration of "(err|ctx)" shadows declaration at'
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - golines
+    - gci
+  settings:
+    golines:
+      reformat-tags: false
+    gci:
+      sections:
+        - standard # Standard section: captures all standard packages.
+        - default # Default section: contains all imports that could not be matched to another section type.
+        - prefix(github.com/mime-rona/) # Custom section: groups all imports with the specified Prefix.
+        - localmodule # Local module sec
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+issues:
+  max-issues-per-linter: 0 # Maximum issues count per one linter. Set to 0 to disable (default 50)
+  max-same-issues: 0 # Maximum count of issues with the same text. Set to 0 to disable (default 3)
