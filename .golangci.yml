@@ -48,9 +48,14 @@ linters:
           - gosec
         path: _test\.go
       - linters:  # Returning "any" is the whole point
-          - interfacebloat
           - ireturn
         path: safetypes/.*\.go
+      - linters:  # Returning "any" is the whole point
+          - ireturn
+        path: iter/.*\.go
+      - linters:  # TODO: REMOVE ME
+          - revive
+        path: iter/.*\.go
       - linters:
           - govet
         text: 'shadow: declaration of "(err|ctx)" shadows declaration at'
