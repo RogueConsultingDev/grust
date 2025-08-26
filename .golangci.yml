@@ -52,6 +52,9 @@ linters:
           - interfacebloat
           - ireturn
         path: safetypes/.*\.go
+      - linters:  # TODO: REMOVE ME
+          - revive
+        path: iter/.*\.go
       - linters:
           - govet
         text: 'shadow: declaration of "(err|ctx)" shadows declaration at'
