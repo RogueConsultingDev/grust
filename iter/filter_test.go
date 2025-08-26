@@ -89,7 +89,7 @@ func Benchmark_Filter(b *testing.B) {
 
 	b.ReportAllocs()
 
-	for n := 0; n < b.N; n++ {
+	for range b.N {
 		for range filter.it {
 
 		}

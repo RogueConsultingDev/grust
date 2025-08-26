@@ -5,6 +5,7 @@ func (i *Iterator[T, U]) FilterMap(f func(T) (U, bool, error)) *Iterator[*U, U] 
 		for v, err := range i.it {
 			if err != nil {
 				yield(nil, err)
+
 				return
 			}
 

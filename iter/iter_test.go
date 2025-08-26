@@ -36,7 +36,7 @@ func TestNew_DoesntAllocate(t *testing.T) {
 
 	idx := 0
 	for v := range iter.it {
-		assert.True(t, &values[idx] == v, "%p != %p", &values[idx], v)
+		assert.Same(t, &values[idx], v, "%p != %p", &values[idx], v)
 		idx += 1
 	}
 }
@@ -62,7 +62,7 @@ func TestNew2_DoesntAllocate(t *testing.T) {
 
 	idx := 0
 	for v := range iter.it {
-		assert.True(t, &values[idx] == v, "%p != %p", &values[idx], v)
+		assert.Same(t, &values[idx], v, "%p != %p", &values[idx], v)
 		idx += 1
 	}
 }
@@ -84,7 +84,7 @@ func TestReversed_DoesntAllocate(t *testing.T) {
 
 	idx := 0
 	for v := range iter.it {
-		assert.True(t, &values[4-idx] == v, "%p != %p", &values[4-idx], v)
+		assert.Same(t, &values[4-idx], v, "%p != %p", &values[4-idx], v)
 		idx += 1
 	}
 }
@@ -115,6 +115,7 @@ func TestRepeat_ReturnsAnInfiniteIterator(t *testing.T) {
 
 	for v := range repeat.it {
 		require.Equal(t, val, v)
+
 		c += 1
 
 		// Let's stop right there
@@ -134,6 +135,7 @@ func TestRepeatN_ReturnsAnInteratorOfNValues(t *testing.T) {
 
 	for v := range repeat.it {
 		require.Equal(t, val, v)
+
 		c += 1
 
 		// Safety stop
@@ -342,6 +344,7 @@ func TestZip_StopsAtTheShortestOfTwoSlices(t *testing.T) {
 	for range Zip(iterA[:3], iterB).it {
 		idx += 1
 	}
+
 	assert.Equal(t, 3, idx)
 
 	// Slice B is shorter
@@ -349,6 +352,7 @@ func TestZip_StopsAtTheShortestOfTwoSlices(t *testing.T) {
 	for range Zip(iterA, iterB[:3]).it {
 		idx += 1
 	}
+
 	assert.Equal(t, 3, idx)
 }
 

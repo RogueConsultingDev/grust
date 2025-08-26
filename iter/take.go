@@ -6,6 +6,7 @@ func (i *Iterator[T, U]) Take(n int) *Iterator[T, U] {
 		for v, err := range i.it {
 			if err != nil {
 				yield(v, err)
+
 				return
 			}
 

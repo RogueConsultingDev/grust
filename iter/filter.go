@@ -5,6 +5,7 @@ func (i *Iterator[T, U]) Filter(predicate func(T) bool) *Iterator[T, U] {
 		for v, err := range i.it {
 			if err != nil {
 				yield(v, err)
+
 				return
 			}
 

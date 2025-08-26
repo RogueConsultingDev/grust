@@ -9,6 +9,7 @@ func (i *Iterator[T, U]) Collect() ([]T, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		output = append(output, v)
 	}
 
@@ -22,6 +23,7 @@ func (i *Iterator[T, U]) Reversed() ([]T, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		output = append([]T{v}, output...)
 	}
 
@@ -60,6 +62,7 @@ func (i *Iterator[T, U]) First() (T, error) {
 	for v, err := range i.it {
 		if err != nil {
 			var t T
+
 			return t, err
 		}
 
@@ -67,6 +70,7 @@ func (i *Iterator[T, U]) First() (T, error) {
 	}
 
 	var t T
+
 	return t, errors.New("empty iterator")
 }
 
@@ -76,12 +80,12 @@ func (i *Iterator[T, U]) Last() (T, error) {
 
 	for v, err := range i.it {
 		found = true
+
 		if err != nil {
 			return t, err
 		}
 
 		t = v
-
 	}
 
 	if !found {
@@ -95,13 +99,13 @@ func (i *Iterator[T, U]) Find(predicate func(T) bool) (T, bool, error) {
 	for v, err := range i.it {
 		if err != nil {
 			var t T
+
 			return t, false, err
 		}
 
 		if predicate(v) {
 			return v, true, nil
 		}
-
 	}
 
 	var t T
@@ -111,6 +115,7 @@ func (i *Iterator[T, U]) Find(predicate func(T) bool) (T, bool, error) {
 
 func (i *Iterator[T, U]) Position(predicate func(T) bool) (int, bool, error) {
 	idx := 0
+
 	for v, err := range i.it {
 		if err != nil {
 			return 0, false, err
@@ -147,6 +152,7 @@ func Copied[T any, U any](i *Iterator[*T, U]) ([]T, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		output = append(output, *v)
 	}
 

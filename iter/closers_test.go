@@ -20,7 +20,7 @@ func TestCollect_CollectsTheIterInASlice(t *testing.T) {
 		assert.Equal(t, values[i], *v)
 
 		// They should point to the same value
-		assert.True(t, &values[i] == v)
+		assert.Same(t, &values[i], v)
 	}
 }
 
@@ -57,7 +57,7 @@ func TestReversed_CollectsTheIterInASliceInReverseOrder(t *testing.T) {
 		assert.Equal(t, values[4-i], *v)
 
 		// They should point to the same value
-		assert.True(t, &values[4-i] == v)
+		assert.Same(t, &values[4-i], v)
 	}
 }
 
@@ -398,7 +398,7 @@ func TestCopied_CopiesTheIterInASlice(t *testing.T) {
 		assert.Equal(t, values[i], v)
 
 		// They should not point to the same value
-		assert.False(t, &values[i] == &v)
+		assert.NotSame(t, &values[i], &v)
 	}
 }
 

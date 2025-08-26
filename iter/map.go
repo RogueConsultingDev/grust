@@ -5,6 +5,7 @@ func (i *Iterator[T, U]) Map(f func(T) (U, error)) *Iterator[*U, any] {
 		for v, err := range i.it {
 			if err != nil {
 				yield(nil, err)
+
 				return
 			}
 

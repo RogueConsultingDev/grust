@@ -78,7 +78,7 @@ func Repeat[T any](v T) *Iterator[T, any] {
 func RepeatN[T any](v T, n int) *Iterator[T, any] {
 	return &Iterator[T, any]{
 		it: func(yield func(T, error) bool) {
-			for i := 0; i < n; i++ {
+			for range n {
 				if !yield(v, nil) {
 					return
 				}
@@ -213,6 +213,7 @@ func ZipEq[T any, U any](a []T, b []U) *Iterator[Tuple[T, U], any] {
 		it: func(yield func(Tuple[T, U], error) bool) {
 			if len(a) != len(b) {
 				yield(Tuple[T, U]{}, errors.New("slices are not the same length"))
+
 				return
 			}
 
