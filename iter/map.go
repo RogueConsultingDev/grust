@@ -1,16 +1,19 @@
-package it
+package betteriter
 
-func Map[T any, U any](iterator Iterator[T], f func(T) (U, error)) Iterator[U] {
-	inner := func(yield func(U, error) bool) {
-		for v := range iterator.it {
-			if !yield(f(v)) {
+func (i *Iterator[T, U]) Map(f func(T) (U, error)) *Iterator[*U, any] {
+	it := func(yield func(*U, error) bool) {
+		for v, err := range i.it {
+			if err != nil {
+				yield(nil, err)
+				return
+			}
+
+			u, err := f(v)
+			if !yield(&u, err) {
 				return
 			}
 		}
 	}
 
-	return Iterator[U]{
-		inner,
-		nil,
-	}
+	return &Iterator[*U, any]{it}
 }

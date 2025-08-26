@@ -1,6 +1,7 @@
 package betteriter
 
-func (i *Iterator[T, U]) Filter(predicate func(T) bool) *Iterator[T, U] {
+// Take creates an iterator that yields at most N elements.
+func (i *Iterator[T, U]) Take(n int) *Iterator[T, U] {
 	inner := func(yield func(T, error) bool) {
 		for v, err := range i.it {
 			if err != nil {
@@ -8,7 +9,13 @@ func (i *Iterator[T, U]) Filter(predicate func(T) bool) *Iterator[T, U] {
 				return
 			}
 
-			if predicate(v) && !yield(v, err) {
+			if !yield(v, err) {
+				return
+			}
+
+			n -= 1
+
+			if n == 0 {
 				return
 			}
 		}
