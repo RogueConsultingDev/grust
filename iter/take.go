@@ -1,4 +1,4 @@
-package betteriter
+package it
 
 // Take creates an iterator that yields at most N elements.
 func (i *Iterator[T, U]) Take(n int) *Iterator[T, U] {

@@ -1,4 +1,4 @@
-package betteriter
+package it
 
 type Enumerator[T any] struct {
 	Idx   int

@@ -1,4 +1,4 @@
-package betteriter
+package it
 
 func (i *Iterator[T, U]) Filter(predicate func(T) bool) *Iterator[T, U] {
 	inner := func(yield func(T, error) bool) {

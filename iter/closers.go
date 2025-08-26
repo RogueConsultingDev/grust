@@ -1,4 +1,4 @@
-package betteriter
+package it
 
 import "errors"
 

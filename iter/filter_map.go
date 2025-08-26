@@ -1,4 +1,4 @@
-package betteriter
+package it
 
 func (i *Iterator[T, U]) FilterMap(f func(T) (U, bool, error)) *Iterator[*U, U] {
 	inner := func(yield func(*U, error) bool) {

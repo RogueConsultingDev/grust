@@ -1,4 +1,4 @@
-package betteriter
+package it
 
 func (i *Iterator[T, U]) Map(f func(T) (U, error)) *Iterator[*U, any] {
 	it := func(yield func(*U, error) bool) {
