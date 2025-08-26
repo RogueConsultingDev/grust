@@ -212,7 +212,8 @@ func ZipEq[T any, U any](a []T, b []U) *Iterator[Tuple[T, U], any] {
 	return &Iterator[Tuple[T, U], any]{
 		it: func(yield func(Tuple[T, U], error) bool) {
 			if len(a) != len(b) {
-				yield(Tuple[T, U]{}, errors.New("slices are not the same length"))
+				var t Tuple[T, U]
+				yield(t, errors.New("slices are not the same length"))
 
 				return
 			}

@@ -375,11 +375,11 @@ func TestZipEq_ReturnsAnErrorIfSlicesAreNotSameLength(t *testing.T) {
 
 	// Slice A is shorter
 	output, err := ZipEq(iterA[:3], iterB).Collect()
-	assert.ErrorContains(t, err, "slices are not the same length")
+	require.ErrorContains(t, err, "slices are not the same length")
 	assert.Empty(t, output)
 
 	// Slice B is shorter
 	output, err = ZipEq(iterA, iterB[:3]).Collect()
-	assert.ErrorContains(t, err, "slices are not the same length")
+	require.ErrorContains(t, err, "slices are not the same length")
 	assert.Empty(t, output)
 }

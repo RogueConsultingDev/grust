@@ -127,7 +127,7 @@ func TestAny_StopsAtTheFirstMatchingElement(t *testing.T) {
 	}
 
 	output, err := iter.Any(func(int) bool { return true })
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.True(t, output)
 }
 
@@ -142,7 +142,7 @@ func TestAny_PropagatesError(t *testing.T) {
 	}
 
 	output, err := iter.Any(func(int) bool { return true })
-	assert.ErrorContains(t, err, "some error")
+	require.ErrorContains(t, err, "some error")
 	assert.False(t, output)
 }
 
@@ -167,7 +167,7 @@ func TestAll_ReturnsTrueIfAllElementsMatchThePredicate(t *testing.T) {
 
 func TestAll_ReturnsFalseIfAnyElementDoesntMatchThePredicate(t *testing.T) {
 	output, err := New([]int{1, 2, 3, 4, 5}).All(func(i *int) bool { return *i < 5 })
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, output)
 }
 
@@ -185,7 +185,7 @@ func TestAll_StopsAtTheFirstNonMatchingElement(t *testing.T) {
 	}
 
 	output, err := iter.All(func(int) bool { return false })
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.False(t, output)
 }
 
@@ -200,7 +200,7 @@ func TestAll_PropagatesError(t *testing.T) {
 	}
 
 	output, err := iter.All(func(int) bool { return true })
-	assert.ErrorContains(t, err, "some error")
+	require.ErrorContains(t, err, "some error")
 	assert.False(t, output)
 }
 
@@ -216,13 +216,13 @@ func TestFirst_ReturnsTheFirstElementOfTheIter(t *testing.T) {
 		},
 	}
 	output, err := iter.First()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, val, output)
 }
 
 func TestFirst_ReturnsAnErrorIfIteratorIsEmpty(t *testing.T) {
 	output, err := New([]int{}).First()
-	assert.ErrorContains(t, err, "empty iterator")
+	require.ErrorContains(t, err, "empty iterator")
 	assert.Nil(t, output)
 }
 
@@ -237,19 +237,19 @@ func TestFirst_PropagatesError(t *testing.T) {
 	}
 
 	output, err := iter.First()
-	assert.ErrorContains(t, err, "some error")
+	require.ErrorContains(t, err, "some error")
 	assert.Zero(t, output)
 }
 
 func TestLast_ReturnsTheFirstElementOfTheIter(t *testing.T) {
 	output, err := New([]int{1, 2, 3, 4, 5}).Last()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 5, *output)
 }
 
 func TestLast_ReturnsAnErrorIfIteratorIsEmpty(t *testing.T) {
 	output, err := New([]int{}).Last()
-	assert.ErrorContains(t, err, "empty iterator")
+	require.ErrorContains(t, err, "empty iterator")
 	assert.Nil(t, output)
 }
 
@@ -264,7 +264,7 @@ func TestLast_PropagatesError(t *testing.T) {
 	}
 
 	output, err := iter.Last()
-	assert.ErrorContains(t, err, "some error")
+	require.ErrorContains(t, err, "some error")
 	assert.Zero(t, output)
 }
 
@@ -303,7 +303,7 @@ func TestFind_PropagatesError(t *testing.T) {
 	}
 
 	output, ok, err := iter.Find(func(int) bool { return false })
-	assert.ErrorContains(t, err, "some error")
+	require.ErrorContains(t, err, "some error")
 	assert.False(t, ok)
 	assert.Zero(t, output)
 }
@@ -343,7 +343,7 @@ func TestPosition_PropagatesError(t *testing.T) {
 	}
 
 	output, ok, err := iter.Position(func(int) bool { return false })
-	assert.ErrorContains(t, err, "some error")
+	require.ErrorContains(t, err, "some error")
 	assert.False(t, ok)
 	assert.Zero(t, output)
 }
@@ -382,7 +382,7 @@ func TestFold_PropagatesError(t *testing.T) {
 	}
 
 	output, err := iter.Fold(0, func(_ int, v int) int { return v })
-	assert.ErrorContains(t, err, "some error")
+	require.ErrorContains(t, err, "some error")
 	// folding should have stopped at 1
 	assert.Equal(t, 1, output)
 }
