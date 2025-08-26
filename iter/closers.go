@@ -30,6 +30,18 @@ func (i *Iterator[T, U]) Reversed() ([]T, error) {
 	return output, nil
 }
 
+func (i *Iterator[T, U]) Apply(f func(T)) error {
+	for v, err := range i.it {
+		if err != nil {
+			return err
+		}
+
+		f(v)
+	}
+
+	return nil
+}
+
 func (i *Iterator[T, U]) Any(predicate func(T) bool) (bool, error) {
 	for v, err := range i.it {
 		if err != nil {

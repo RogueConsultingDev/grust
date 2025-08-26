@@ -83,6 +83,51 @@ func TestReversed_PropagatesError(t *testing.T) {
 	assert.Empty(t, output)
 }
 
+func TestApply_AppliesTheFunctionToAllElements(t *testing.T) {
+	type S struct {
+		i int
+	}
+	values := []S{{i: 1}, {i: 2}, {i: 3}, {i: 4}, {i: 5}}
+	err := New(values).Apply(func(s *S) {
+		s.i *= 2
+	})
+	require.NoError(t, err)
+
+	for idx, value := range values {
+		assert.Equal(t, (idx+1)*2, value.i)
+	}
+}
+
+func TestApply_StopsOnError(t *testing.T) {
+	iter := &Iterator[int, any]{
+		it: func(yield func(int, error) bool) {
+			if !yield(1, nil) {
+				return
+			}
+			if !yield(42, errors.New("some error")) {
+				return
+			}
+			require.Fail(t, "Should not reach this point")
+			if !yield(2, nil) {
+				return
+			}
+		},
+	}
+
+	called := false
+	callback := func(i int) {
+		called = true
+
+		// This callback should be called only once, with value 1
+		assert.Equal(t, 1, i)
+	}
+
+	err := iter.Apply(callback)
+	require.ErrorContains(t, err, "some error")
+
+	assert.True(t, called)
+}
+
 func TestAny_ReturnsTrueOnFirstElementThatMatchesThePredicate(t *testing.T) {
 	predicate := func(*int) bool { return true }
 
