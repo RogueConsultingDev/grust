@@ -163,7 +163,7 @@ func (o *Option[T]) UnwrapOrDefault() T {
 }
 
 // AsOkOr converts an option to a Ok when opt is Some or result.Err when opt is None.
-func (o *Option[T]) AsOkOr(err error) Result[T] {
+func (o *Option[T]) AsOkOr(err error) *Result[T] {
 	if o.ok {
 		return Ok[T](o.val)
 	}
@@ -172,7 +172,7 @@ func (o *Option[T]) AsOkOr(err error) Result[T] {
 }
 
 // AsOkOrElse converts an option to a Ok when opt is Some or result.Err when opt is None.
-func (o *Option[T]) AsOkOrElse(f func() error) Result[T] {
+func (o *Option[T]) AsOkOrElse(f func() error) *Result[T] {
 	if o.ok {
 		return Ok[T](o.val)
 	}
