@@ -2,7 +2,7 @@ lint:
     pre-commit run -a
 
 test:
-    go test -coverprofile=.coverage ./...
+    go tool gotestsum -- -coverprofile=.coverage ./...
 
 cov-render:
     go tool cover -html .coverage -o coverage.html
