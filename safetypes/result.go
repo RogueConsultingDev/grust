@@ -38,9 +38,9 @@ type Result[T any] interface {
 	// InspectErr calls a function with a reference to the contained value if Err. Returns the original result.
 	InspectErr(f func(error)) Result[T]
 	// AsOptionValue converts a Result to a Some when res is result.Ok or None when res is result.Err.
-	AsOptionValue() Option[T]
+	AsOptionValue() *Option[T]
 	// AsOptionErr converts a Result to a Some when res is result.Err or None when res is result.Ok.
-	AsOptionErr() Option[error]
+	AsOptionErr() *Option[error]
 
 	// WrapErr wraps the error of an Err, leaving Ok untouched
 	WrapErr(msg string) Result[T]
@@ -219,7 +219,7 @@ func (r *result[T]) UnwrapErr() error {
 	return r.err
 }
 
-func (r *result[T]) AsOptionValue() Option[T] {
+func (r *result[T]) AsOptionValue() *Option[T] {
 	if r.ok {
 		return Some(r.val)
 	}
@@ -227,7 +227,7 @@ func (r *result[T]) AsOptionValue() Option[T] {
 	return None[T]()
 }
 
-func (r *result[T]) AsOptionErr() Option[error] {
+func (r *result[T]) AsOptionErr() *Option[error] {
 	if !r.ok {
 		return Some(r.err)
 	}

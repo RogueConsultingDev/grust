@@ -6,91 +6,26 @@ import (
 	"reflect"
 )
 
-// Option is a type that represents either a value (Some) or not (None).
-type Option[T any] interface {
-	// IsNone returns true if the option is a None value.
-	IsNone() bool
-	// IsNoneOr returns true if the option is a None or the value inside of it matches a predicate.
-	IsNoneOr(f func(T) bool) bool
-	// IsSome returns true if the option is a Some value.
-	IsSome() bool
-	// IsSomeAnd returns true if the option is a Some and the value inside of it matches a predicate.
-	IsSomeAnd(f func(T) bool) bool
-	// Expect returns the contained Some value, consuming the self value. Panics if the value is a None with a custom
-	// panic message provided by msg.
-	Expect(msg string) T
-	// Unwrap returns the contained Some value, consuming the self value. Panics if the self value equals None.
-	Unwrap() T
-	// UnwrapOr returns the contained Some value or a provided default.
-	UnwrapOr(def T) T
-	// UnwrapOrElse returns the contained Some value or computes it from a closure.
-	UnwrapOrElse(f func() T) T
-	// UnwrapOrDefault returns the contained Some value or a default.
-	UnwrapOrDefault() T
-	// AsOkOr converts an option to a Ok when opt is Some or result.Err when opt is None.
-	AsOkOr(err error) Result[T]
-	// AsOkOrElse converts an option to a Ok when opt is Some or result.Err when opt is None.
-	AsOkOrElse(f func() error) Result[T]
-	// Inspect calls a function with a reference to the contained value if Some. Returns the original option.
-	Inspect(f func(T)) Option[T]
-	// Filter returns None if the option is None, otherwise calls predicate with the wrapped value and returns:
-	//  * Some(t) if predicate returns true (where t is the wrapped value), and
-	//  * None if predicate returns false.
-	Filter(f func(T) bool) Option[T]
-	// Or returns the option if it contains a value, otherwise returns optb.
-	Or(other Option[T]) Option[T]
-	// OrElse returns the option if it contains a value, otherwise calls f and returns the result.
-	OrElse(f func() Option[T]) Option[T]
-	// Xor returns Some if exactly one of self, optb is Some, otherwise returns None.
-	Xor(other Option[T]) Option[T]
-	// Insert inserts value into the option, then returns a mutable reference to it.
-	//
-	// If the option already contains a value, the old value is dropped.
-	//
-	// See also GetOrInsert, which doesn’t update the value if the option already contains Some.
-	Insert(value T) *T
-	// GetOrInsert inserts value into the option if it is None, then returns a pointer to the contained value.
-	//
-	// See also Insert, which updates the value even if the option already contains Some.
-	GetOrInsert(value T) *T
-	// GetOrInsertDefault inserts the default value into the option if it is None, then returns a pointer to the
-	// contained value.
-	GetOrInsertDefault() *T
-	// GetOrInsertWith inserts a value computed from f into the option if it is None, then returns a pointer to the
-	// contained value.
-	GetOrInsertWith(f func() T) *T
-	// Take takes the value out of the option, leaving a None in its place.
-	Take() Option[T]
-	// TakeIf takes the value out of the option, but only if the predicate evaluates to true on a mutable reference to
-	// the value.
-	//
-	// In other words, replaces self with None if the predicate returns true. This method operates similar to take but
-	// conditional.
-	TakeIf(f func(T) bool) Option[T]
-
-	fmt.Stringer
-}
-
 // None creates a None variant of Option.
-func None[T any]() Option[T] {
+func None[T any]() *Option[T] {
 	var v T
 
-	return &option[T]{
+	return &Option[T]{
 		ok:  false,
 		val: v,
 	}
 }
 
 // Some creates a Some variant of Option from the value.
-func Some[T any](val T) Option[T] {
-	return &option[T]{
+func Some[T any](val T) *Option[T] {
+	return &Option[T]{
 		ok:  true,
 		val: val,
 	}
 }
 
 // OptionOf creates an Option from the given value.
-func OptionOf[T any](val T) Option[T] {
+func OptionOf[T any](val T) *Option[T] {
 	if reflect.ValueOf(&val).Elem().IsZero() {
 		return None[T]()
 	}
@@ -100,7 +35,7 @@ func OptionOf[T any](val T) Option[T] {
 
 // MapOption maps an Option<T> to Option<U> by applying a function to a contained value (if Some) or returns None
 // (if None).
-func MapOption[T any, U any](opt Option[T], f func(T) U) Option[U] {
+func MapOption[T any, U any](opt *Option[T], f func(T) U) *Option[U] {
 	if opt.IsNone() {
 		return None[U]()
 	}
@@ -109,7 +44,7 @@ func MapOption[T any, U any](opt Option[T], f func(T) U) Option[U] {
 }
 
 // MapOptionOr returns the provided default result (if None), or applies a function to the contained value (if Some).
-func MapOptionOr[T any, U any](opt Option[T], def U, f func(T) U) U {
+func MapOptionOr[T any, U any](opt *Option[T], def U, f func(T) U) U {
 	if opt.IsNone() {
 		return def
 	}
@@ -119,7 +54,7 @@ func MapOptionOr[T any, U any](opt Option[T], def U, f func(T) U) U {
 
 // MapOptionOrElse computes a default function result (if None), or applies a different function to the contained value
 // (if Some).
-func MapOptionOrElse[T any, U any](opt Option[T], factory func() U, f func(T) U) U {
+func MapOptionOrElse[T any, U any](opt *Option[T], factory func() U, f func(T) U) U {
 	if opt.IsNone() {
 		return factory()
 	}
@@ -128,7 +63,7 @@ func MapOptionOrElse[T any, U any](opt Option[T], factory func() U, f func(T) U)
 }
 
 // And returns None if the option is None, otherwise returns `optb`.
-func And[T any, U any](opt Option[T], other Option[U]) Option[U] {
+func And[T any, U any](opt *Option[T], other *Option[U]) *Option[U] {
 	if opt.IsNone() {
 		return None[U]()
 	}
@@ -137,7 +72,7 @@ func And[T any, U any](opt Option[T], other Option[U]) Option[U] {
 }
 
 // AndThen returns None if the option is None, otherwise calls `f` with the wrapped value and returns the result.
-func AndThen[T any, U any](opt Option[T], f func(T) Option[U]) Option[U] {
+func AndThen[T any, U any](opt *Option[T], f func(T) *Option[U]) *Option[U] {
 	if opt.IsNone() {
 		return None[U]()
 	}
@@ -145,16 +80,19 @@ func AndThen[T any, U any](opt Option[T], f func(T) Option[U]) Option[U] {
 	return f(opt.Unwrap())
 }
 
-type option[T any] struct {
+// Option is a type that represents either a value (Some) or not (None).
+type Option[T any] struct {
 	ok  bool
 	val T
 }
 
-func (o *option[T]) IsNone() bool {
+// IsNone returns true if the option is a None value.
+func (o *Option[T]) IsNone() bool {
 	return !o.ok
 }
 
-func (o *option[T]) IsNoneOr(f func(T) bool) bool {
+// IsNoneOr returns true if the option is a None or the value inside of it matches a predicate.
+func (o *Option[T]) IsNoneOr(f func(T) bool) bool {
 	if !o.ok {
 		return true
 	}
@@ -162,11 +100,13 @@ func (o *option[T]) IsNoneOr(f func(T) bool) bool {
 	return f(o.val)
 }
 
-func (o *option[T]) IsSome() bool {
+// IsSome returns true if the option is a Some value.
+func (o *Option[T]) IsSome() bool {
 	return o.ok
 }
 
-func (o *option[T]) IsSomeAnd(f func(T) bool) bool {
+// IsSomeAnd returns true if the option is a Some and the value inside of it matches a predicate.
+func (o *Option[T]) IsSomeAnd(f func(T) bool) bool {
 	if !o.ok {
 		return false
 	}
@@ -174,7 +114,9 @@ func (o *option[T]) IsSomeAnd(f func(T) bool) bool {
 	return f(o.val)
 }
 
-func (o *option[T]) Expect(msg string) T {
+// Expect returns the contained Some value, consuming the self value. Panics if the value is a None with a custom
+// panic message provided by msg.
+func (o *Option[T]) Expect(msg string) T {
 	if o.ok {
 		return o.val
 	}
@@ -182,7 +124,8 @@ func (o *option[T]) Expect(msg string) T {
 	panic(errors.New(msg))
 }
 
-func (o *option[T]) Unwrap() T {
+// Unwrap returns the contained Some value, consuming the self value. Panics if the self value equals None.
+func (o *Option[T]) Unwrap() T {
 	if o.ok {
 		return o.val
 	}
@@ -190,7 +133,8 @@ func (o *option[T]) Unwrap() T {
 	panic(errors.New("called `Option.Unwrap()` on a `None` value"))
 }
 
-func (o *option[T]) UnwrapOr(def T) T {
+// UnwrapOr returns the contained Some value or a provided default.
+func (o *Option[T]) UnwrapOr(def T) T {
 	if o.ok {
 		return o.val
 	}
@@ -198,7 +142,8 @@ func (o *option[T]) UnwrapOr(def T) T {
 	return def
 }
 
-func (o *option[T]) UnwrapOrElse(f func() T) T {
+// UnwrapOrElse returns the contained Some value or computes it from a closure.
+func (o *Option[T]) UnwrapOrElse(f func() T) T {
 	if o.ok {
 		return o.val
 	}
@@ -206,7 +151,8 @@ func (o *option[T]) UnwrapOrElse(f func() T) T {
 	return f()
 }
 
-func (o *option[T]) UnwrapOrDefault() T {
+// UnwrapOrDefault returns the contained Some value or a default.
+func (o *Option[T]) UnwrapOrDefault() T {
 	if o.ok {
 		return o.val
 	}
@@ -216,7 +162,8 @@ func (o *option[T]) UnwrapOrDefault() T {
 	return def
 }
 
-func (o *option[T]) AsOkOr(err error) Result[T] {
+// AsOkOr converts an option to a Ok when opt is Some or result.Err when opt is None.
+func (o *Option[T]) AsOkOr(err error) Result[T] {
 	if o.ok {
 		return Ok[T](o.val)
 	}
@@ -224,7 +171,8 @@ func (o *option[T]) AsOkOr(err error) Result[T] {
 	return Err[T](err)
 }
 
-func (o *option[T]) AsOkOrElse(f func() error) Result[T] {
+// AsOkOrElse converts an option to a Ok when opt is Some or result.Err when opt is None.
+func (o *Option[T]) AsOkOrElse(f func() error) Result[T] {
 	if o.ok {
 		return Ok[T](o.val)
 	}
@@ -232,7 +180,8 @@ func (o *option[T]) AsOkOrElse(f func() error) Result[T] {
 	return Err[T](f())
 }
 
-func (o *option[T]) Inspect(f func(T)) Option[T] {
+// Inspect calls a function with a reference to the contained value if Some. Returns the original option.
+func (o *Option[T]) Inspect(f func(T)) *Option[T] {
 	if o.ok {
 		f(o.val)
 	}
@@ -240,7 +189,10 @@ func (o *option[T]) Inspect(f func(T)) Option[T] {
 	return o
 }
 
-func (o *option[T]) Filter(f func(T) bool) Option[T] {
+// Filter returns None if the option is None, otherwise calls predicate with the wrapped value and returns:
+//   - Some(t) if predicate returns true (where t is the wrapped value), and
+//   - None if predicate returns false.
+func (o *Option[T]) Filter(f func(T) bool) *Option[T] {
 	if o.ok && f(o.val) {
 		return o
 	}
@@ -248,7 +200,8 @@ func (o *option[T]) Filter(f func(T) bool) Option[T] {
 	return None[T]()
 }
 
-func (o *option[T]) Or(other Option[T]) Option[T] {
+// Or returns the option if it contains a value, otherwise returns optb.
+func (o *Option[T]) Or(other *Option[T]) *Option[T] {
 	if o.ok {
 		return o
 	}
@@ -256,7 +209,8 @@ func (o *option[T]) Or(other Option[T]) Option[T] {
 	return other
 }
 
-func (o *option[T]) OrElse(f func() Option[T]) Option[T] {
+// OrElse returns the option if it contains a value, otherwise calls f and returns the result.
+func (o *Option[T]) OrElse(f func() *Option[T]) *Option[T] {
 	if o.ok {
 		return o
 	}
@@ -264,7 +218,8 @@ func (o *option[T]) OrElse(f func() Option[T]) Option[T] {
 	return f()
 }
 
-func (o *option[T]) Xor(other Option[T]) Option[T] {
+// Xor returns Some if exactly one of self, optb is Some, otherwise returns None.
+func (o *Option[T]) Xor(other *Option[T]) *Option[T] {
 	if o.ok && other.IsNone() {
 		return o
 	}
@@ -276,14 +231,22 @@ func (o *option[T]) Xor(other Option[T]) Option[T] {
 	return None[T]()
 }
 
-func (o *option[T]) Insert(val T) *T {
+// Insert inserts value into the option, then returns a mutable reference to it.
+//
+// If the option already contains a value, the old value is dropped.
+//
+// See also GetOrInsert, which doesn’t update the value if the option already contains Some.
+func (o *Option[T]) Insert(val T) *T {
 	o.ok = true
 	o.val = val
 
 	return &o.val
 }
 
-func (o *option[T]) GetOrInsert(val T) *T {
+// GetOrInsert inserts value into the option if it is None, then returns a pointer to the contained value.
+//
+// See also Insert, which updates the value even if the option already contains Some.
+func (o *Option[T]) GetOrInsert(val T) *T {
 	if o.ok {
 		return &o.val
 	}
@@ -294,7 +257,9 @@ func (o *option[T]) GetOrInsert(val T) *T {
 	return &o.val
 }
 
-func (o *option[T]) GetOrInsertDefault() *T {
+// GetOrInsertDefault inserts the default value into the option if it is None, then returns a pointer to the
+// contained value.
+func (o *Option[T]) GetOrInsertDefault() *T {
 	if o.ok {
 		return &o.val
 	}
@@ -307,7 +272,9 @@ func (o *option[T]) GetOrInsertDefault() *T {
 	return &o.val
 }
 
-func (o *option[T]) GetOrInsertWith(f func() T) *T {
+// GetOrInsertWith inserts a value computed from f into the option if it is None, then returns a pointer to the
+// contained value.
+func (o *Option[T]) GetOrInsertWith(f func() T) *T {
 	if o.ok {
 		return &o.val
 	}
@@ -318,7 +285,8 @@ func (o *option[T]) GetOrInsertWith(f func() T) *T {
 	return &o.val
 }
 
-func (o *option[T]) Take() Option[T] {
+// Take takes the value out of the option, leaving a None in its place.
+func (o *Option[T]) Take() *Option[T] {
 	if o.ok {
 		res := *o
 
@@ -330,7 +298,12 @@ func (o *option[T]) Take() Option[T] {
 	return o
 }
 
-func (o *option[T]) TakeIf(f func(T) bool) Option[T] {
+// TakeIf takes the value out of the option, but only if the predicate evaluates to true on a mutable reference to
+// the value.
+//
+// In other words, replaces self with None if the predicate returns true. This method operates similar to take but
+// conditional.
+func (o *Option[T]) TakeIf(f func(T) bool) *Option[T] {
 	if o.ok && f(o.val) {
 		res := *o
 
@@ -342,7 +315,7 @@ func (o *option[T]) TakeIf(f func(T) bool) Option[T] {
 	return None[T]()
 }
 
-func (o *option[T]) String() string {
+func (o *Option[T]) String() string {
 	if o.ok {
 		return fmt.Sprintf("Some(%v)", o.val)
 	}

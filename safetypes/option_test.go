@@ -38,7 +38,7 @@ func TestFrom_ReturnsNewOptionFromArgs(t *testing.T) {
 		res7 := OptionOf(&zeroStr)
 		assert.True(t, res7.IsSome())
 
-		zeroS := S{} //nolint:exhaustruct  // We want the zero value
+		var zeroS S
 		res8 := OptionOf(&zeroS)
 		assert.True(t, res8.IsSome())
 	})
@@ -171,7 +171,7 @@ func TestAndThen_ReturnsMappedOptionOrNone(t *testing.T) {
 		s := Some(val)
 
 		other := Some(fake.RandomStringWithLength(8))
-		f := func(o int) Option[string] {
+		f := func(o int) *Option[string] {
 			assert.Equal(t, val, o)
 
 			return other
@@ -183,10 +183,10 @@ func TestAndThen_ReturnsMappedOptionOrNone(t *testing.T) {
 	t.Run("none", func(t *testing.T) {
 		n := None[int]()
 
-		f := func(int) Option[string] {
+		f := func(int) *Option[string] {
 			assert.Fail(t, "mapper should not have been called")
 
-			return newNone[string]()
+			return None[string]()
 		}
 
 		assert.Equal(t, None[string](), AndThen(n, f))
@@ -196,13 +196,13 @@ func TestAndThen_ReturnsMappedOptionOrNone(t *testing.T) {
 func TestOption_IsNone(t *testing.T) {
 	t.Run("Some", func(t *testing.T) {
 		val := fake.Int()
-		o := newSome[int](val)
+		o := Some(val)
 
 		assert.False(t, o.IsNone())
 	})
 
 	t.Run("None", func(t *testing.T) {
-		o := newNone[int]()
+		o := None[int]()
 
 		assert.True(t, o.IsNone())
 	})
@@ -211,7 +211,7 @@ func TestOption_IsNone(t *testing.T) {
 func TestOption_IsNoneOr(t *testing.T) {
 	t.Run("Some", func(t *testing.T) {
 		val := fake.Int()
-		o := newSome[int](val)
+		o := Some(val)
 
 		for _, res := range []bool{true, false} {
 			name := fmt.Sprintf("predicate returns %v", res)
@@ -233,7 +233,7 @@ func TestOption_IsNoneOr(t *testing.T) {
 	})
 
 	t.Run("None", func(t *testing.T) {
-		o := newNone[int]()
+		o := None[int]()
 
 		for _, res := range []bool{true, false} {
 			name := fmt.Sprintf("predicate returns %v", res)
@@ -253,13 +253,13 @@ func TestOption_IsNoneOr(t *testing.T) {
 func TestOption_IsSome(t *testing.T) {
 	t.Run("Some", func(t *testing.T) {
 		val := fake.Int()
-		o := newSome[int](val)
+		o := Some(val)
 
 		assert.True(t, o.IsSome())
 	})
 
 	t.Run("None", func(t *testing.T) {
-		o := newNone[int]()
+		o := None[int]()
 
 		assert.False(t, o.IsSome())
 	})
@@ -268,7 +268,7 @@ func TestOption_IsSome(t *testing.T) {
 func TestOption_IsSomeAnd(t *testing.T) {
 	t.Run("Some", func(t *testing.T) {
 		val := fake.Int()
-		o := newSome[int](val)
+		o := Some(val)
 
 		for _, res := range []bool{true, false} {
 			name := fmt.Sprintf("predicate returns %v", res)
@@ -290,7 +290,7 @@ func TestOption_IsSomeAnd(t *testing.T) {
 	})
 
 	t.Run("None", func(t *testing.T) {
-		o := newNone[int]()
+		o := None[int]()
 
 		for _, res := range []bool{true, false} {
 			name := fmt.Sprintf("predicate returns %v", res)
@@ -310,13 +310,13 @@ func TestOption_IsSomeAnd(t *testing.T) {
 func TestOption_Expect(t *testing.T) {
 	t.Run("Some", func(t *testing.T) {
 		val := fake.Int()
-		o := newSome[int](val)
+		o := Some(val)
 
 		assert.Equal(t, val, o.Expect(fake.RandomStringWithLength(8)))
 	})
 
 	t.Run("None", func(t *testing.T) {
-		o := newNone[int]()
+		o := None[int]()
 
 		msg := fake.RandomStringWithLength(8)
 		assert.PanicsWithError(t, msg, func() {
@@ -328,13 +328,13 @@ func TestOption_Expect(t *testing.T) {
 func TestOption_Unwrap(t *testing.T) {
 	t.Run("Some", func(t *testing.T) {
 		val := fake.Int()
-		o := newSome[int](val)
+		o := Some(val)
 
 		assert.Equal(t, val, o.Unwrap())
 	})
 
 	t.Run("None", func(t *testing.T) {
-		o := newNone[int]()
+		o := None[int]()
 
 		assert.PanicsWithError(t, "called `Option.Unwrap()` on a `None` value", func() {
 			o.Unwrap()
@@ -345,13 +345,13 @@ func TestOption_Unwrap(t *testing.T) {
 func TestOption_UnwrapOr(t *testing.T) {
 	t.Run("Some", func(t *testing.T) {
 		val := fake.Int()
-		o := newSome[int](val)
+		o := Some(val)
 
 		assert.Equal(t, val, o.UnwrapOr(fake.Int()))
 	})
 
 	t.Run("None", func(t *testing.T) {
-		o := newNone[int]()
+		o := None[int]()
 
 		fallback := fake.Int()
 
@@ -362,7 +362,7 @@ func TestOption_UnwrapOr(t *testing.T) {
 func TestOption_UnwrapOrElse(t *testing.T) {
 	t.Run("Some", func(t *testing.T) {
 		val := fake.Int()
-		o := newSome[int](val)
+		o := Some(val)
 
 		predicate := func() int {
 			assert.Fail(t, "predicate should not be called")
@@ -374,7 +374,7 @@ func TestOption_UnwrapOrElse(t *testing.T) {
 	})
 
 	t.Run("None", func(t *testing.T) {
-		o := newNone[int]()
+		o := None[int]()
 
 		fallback := fake.Int()
 
@@ -389,17 +389,17 @@ func TestOption_UnwrapOrElse(t *testing.T) {
 func TestOption_UnwrapOrDefault(t *testing.T) {
 	t.Run("Some", func(t *testing.T) {
 		val := fake.Int()
-		o := newSome[int](val)
+		o := Some(val)
 
 		assert.Equal(t, val, o.UnwrapOrDefault())
 	})
 
 	t.Run("None", func(t *testing.T) {
-		oi := newNone[int]()
+		oi := None[int]()
 
 		assert.Equal(t, 0, oi.UnwrapOrDefault())
 
-		os := newNone[string]()
+		os := None[string]()
 
 		assert.Empty(t, os.UnwrapOrDefault())
 	})
@@ -408,7 +408,7 @@ func TestOption_UnwrapOrDefault(t *testing.T) {
 func TestAsOkOr(t *testing.T) {
 	t.Run("some", func(t *testing.T) {
 		val := fake.Int()
-		o := newSome[int](val)
+		o := Some(val)
 
 		expected := Ok[int](val)
 
@@ -416,7 +416,7 @@ func TestAsOkOr(t *testing.T) {
 	})
 
 	t.Run("none", func(t *testing.T) {
-		o := newNone[int]()
+		o := None[int]()
 		err := errors.New(fake.RandomStringWithLength(8))
 
 		expected := Err[int](err)
@@ -428,7 +428,7 @@ func TestAsOkOr(t *testing.T) {
 func TestAsOkOrElse(t *testing.T) {
 	t.Run("some", func(t *testing.T) {
 		val := fake.Int()
-		o := newSome[int](val)
+		o := Some(val)
 
 		f := func() error {
 			assert.Fail(t, "should not be called")
@@ -442,7 +442,7 @@ func TestAsOkOrElse(t *testing.T) {
 	})
 
 	t.Run("none", func(t *testing.T) {
-		o := newNone[int]()
+		o := None[int]()
 		err := errors.New(fake.RandomStringWithLength(8))
 
 		f := func() error {
@@ -458,7 +458,7 @@ func TestAsOkOrElse(t *testing.T) {
 func TestOption_Inspect(t *testing.T) {
 	t.Run("Some", func(t *testing.T) {
 		val := fake.Int()
-		o := newSome[int](val)
+		o := Some(val)
 
 		called := false
 		predicate := func(v int) {
@@ -472,7 +472,7 @@ func TestOption_Inspect(t *testing.T) {
 	})
 
 	t.Run("None", func(t *testing.T) {
-		o := newNone[int]()
+		o := None[int]()
 
 		predicate := func(int) {
 			assert.Fail(t, "predicate should not be called")
@@ -485,7 +485,7 @@ func TestOption_Inspect(t *testing.T) {
 func TestOption_Filter(t *testing.T) {
 	t.Run("Some", func(t *testing.T) {
 		val := fake.Int()
-		o := newSome[int](val)
+		o := Some(val)
 
 		for _, res := range []bool{true, false} {
 			name := fmt.Sprintf("predicate returns %v", res)
@@ -502,7 +502,7 @@ func TestOption_Filter(t *testing.T) {
 				if res {
 					assert.Equal(t, o, o.Filter(f))
 				} else {
-					assert.Equal(t, newNone[int](), o.Filter(f))
+					assert.Equal(t, None[int](), o.Filter(f))
 				}
 
 				assert.True(t, called, "predicate should have been called")
@@ -511,7 +511,7 @@ func TestOption_Filter(t *testing.T) {
 	})
 
 	t.Run("None", func(t *testing.T) {
-		o := newNone[int]()
+		o := None[int]()
 
 		for _, res := range []bool{true, false} {
 			name := fmt.Sprintf("predicate returns %v", res)
@@ -522,7 +522,7 @@ func TestOption_Filter(t *testing.T) {
 					return res
 				}
 
-				assert.Equal(t, newNone[int](), o.Filter(f))
+				assert.Equal(t, None[int](), o.Filter(f))
 			})
 		}
 	})
@@ -531,17 +531,17 @@ func TestOption_Filter(t *testing.T) {
 func TestOption_Or(t *testing.T) {
 	t.Run("Some", func(t *testing.T) {
 		val := fake.Int()
-		o := newSome[int](val)
+		o := Some(val)
 
-		other := newSome[int](fake.Int())
+		other := Some(fake.Int())
 
 		assert.Equal(t, o, o.Or(other))
 	})
 
 	t.Run("None", func(t *testing.T) {
-		o := newNone[int]()
+		o := None[int]()
 
-		other := newSome[int](fake.Int())
+		other := Some(fake.Int())
 
 		assert.Equal(t, other, o.Or(other))
 	})
@@ -550,22 +550,22 @@ func TestOption_Or(t *testing.T) {
 func TestOption_OrElse(t *testing.T) {
 	t.Run("Some", func(t *testing.T) {
 		val := fake.Int()
-		o := newSome[int](val)
+		o := Some(val)
 
-		otherFactory := func() Option[int] {
+		otherFactory := func() *Option[int] {
 			assert.Fail(t, "factory should not be called")
 
-			return newSome[int](fake.Int())
+			return Some(fake.Int())
 		}
 
 		assert.Equal(t, o, o.OrElse(otherFactory))
 	})
 
 	t.Run("None", func(t *testing.T) {
-		o := newNone[int]()
+		o := None[int]()
 
-		other := newSome[int](fake.Int())
-		otherFactory := func() Option[int] {
+		other := Some(fake.Int())
+		otherFactory := func() *Option[int] {
 			return other
 		}
 
@@ -576,30 +576,30 @@ func TestOption_OrElse(t *testing.T) {
 func TestOption_Xor(t *testing.T) {
 	t.Run("Some", func(t *testing.T) {
 		val := fake.Int()
-		o := newSome[int](val)
+		o := Some(val)
 
 		t.Run("other is some", func(t *testing.T) {
-			other := newSome(fake.Int())
-			assert.Equal(t, newNone[int](), o.Xor(other))
+			other := Some(fake.Int())
+			assert.Equal(t, None[int](), o.Xor(other))
 		})
 
 		t.Run("other is none", func(t *testing.T) {
-			other := newNone[int]()
+			other := None[int]()
 			assert.Same(t, o, o.Xor(other))
 		})
 	})
 
 	t.Run("None", func(t *testing.T) {
-		o := newNone[int]()
+		o := None[int]()
 
 		t.Run("other is some", func(t *testing.T) {
-			other := newSome(fake.Int())
+			other := Some(fake.Int())
 			assert.Same(t, other, o.Xor(other))
 		})
 
 		t.Run("other is none", func(t *testing.T) {
-			other := newNone[int]()
-			assert.Equal(t, newNone[int](), o.Xor(other))
+			other := None[int]()
+			assert.Equal(t, None[int](), o.Xor(other))
 		})
 	})
 }
@@ -607,14 +607,14 @@ func TestOption_Xor(t *testing.T) {
 func TestOption_Insert(t *testing.T) {
 	t.Run("Some", func(t *testing.T) {
 		val := fake.Int()
-		o := newSome(val)
+		o := Some(val)
 
 		newVal := fake.Int()
 		res := o.Insert(newVal)
 
 		assert.Equal(t, newVal, *res)
 
-		expected := &option[int]{
+		expected := &Option[int]{
 			ok:  true,
 			val: newVal,
 		}
@@ -627,14 +627,14 @@ func TestOption_Insert(t *testing.T) {
 	})
 
 	t.Run("None", func(t *testing.T) {
-		o := newNone[int]()
+		o := None[int]()
 
 		newVal := fake.Int()
 		res := o.Insert(newVal)
 
 		assert.Equal(t, newVal, *res)
 
-		expected := &option[int]{
+		expected := &Option[int]{
 			ok:  true,
 			val: newVal,
 		}
@@ -650,14 +650,14 @@ func TestOption_Insert(t *testing.T) {
 func TestOption_GetOrInsert(t *testing.T) {
 	t.Run("Some", func(t *testing.T) {
 		val := fake.Int()
-		o := newSome(val)
+		o := Some(val)
 
 		newVal := fake.Int()
 		res := o.GetOrInsert(newVal)
 
 		assert.Equal(t, val, *res)
 
-		expected := &option[int]{
+		expected := &Option[int]{
 			ok:  true,
 			val: val,
 		}
@@ -670,14 +670,14 @@ func TestOption_GetOrInsert(t *testing.T) {
 	})
 
 	t.Run("None", func(t *testing.T) {
-		o := newNone[int]()
+		o := None[int]()
 
 		newVal := fake.Int()
 		res := o.GetOrInsert(newVal)
 
 		assert.Equal(t, newVal, *res)
 
-		expected := &option[int]{
+		expected := &Option[int]{
 			ok:  true,
 			val: newVal,
 		}
@@ -693,13 +693,13 @@ func TestOption_GetOrInsert(t *testing.T) {
 func TestOption_GetOrInsertDefault(t *testing.T) {
 	t.Run("Some", func(t *testing.T) {
 		val := fake.Int()
-		o := newSome(val)
+		o := Some(val)
 
 		res := o.GetOrInsertDefault()
 
 		assert.Equal(t, val, *res)
 
-		expected := &option[int]{
+		expected := &Option[int]{
 			ok:  true,
 			val: val,
 		}
@@ -712,13 +712,13 @@ func TestOption_GetOrInsertDefault(t *testing.T) {
 	})
 
 	t.Run("None", func(t *testing.T) {
-		o := newNone[int]()
+		o := None[int]()
 
 		res := o.GetOrInsertDefault()
 
 		assert.Equal(t, 0, *res)
 
-		expected := &option[int]{
+		expected := &Option[int]{
 			ok:  true,
 			val: 0,
 		}
@@ -734,7 +734,7 @@ func TestOption_GetOrInsertDefault(t *testing.T) {
 func TestOption_GetOrInsertWith(t *testing.T) {
 	t.Run("Some", func(t *testing.T) {
 		val := fake.Int()
-		o := newSome(val)
+		o := Some(val)
 
 		newVal := fake.Int()
 		factory := func() int {
@@ -746,7 +746,7 @@ func TestOption_GetOrInsertWith(t *testing.T) {
 
 		assert.Equal(t, val, *res)
 
-		expected := &option[int]{
+		expected := &Option[int]{
 			ok:  true,
 			val: val,
 		}
@@ -759,7 +759,7 @@ func TestOption_GetOrInsertWith(t *testing.T) {
 	})
 
 	t.Run("None", func(t *testing.T) {
-		o := newNone[int]()
+		o := None[int]()
 
 		newVal := fake.Int()
 		factory := func() int {
@@ -769,7 +769,7 @@ func TestOption_GetOrInsertWith(t *testing.T) {
 
 		assert.Equal(t, newVal, *res)
 
-		expected := &option[int]{
+		expected := &Option[int]{
 			ok:  true,
 			val: newVal,
 		}
@@ -785,11 +785,11 @@ func TestOption_GetOrInsertWith(t *testing.T) {
 func TestOption_Take(t *testing.T) {
 	t.Run("Some", func(t *testing.T) {
 		val := fake.Int()
-		o := newSome(val)
+		o := Some(val)
 
 		res := o.Take()
 
-		expected := newSome(val)
+		expected := Some(val)
 		assert.Equal(t, expected, res)
 
 		// Original opt should now be a None
@@ -797,7 +797,7 @@ func TestOption_Take(t *testing.T) {
 	})
 
 	t.Run("None", func(t *testing.T) {
-		o := newNone[int]()
+		o := None[int]()
 
 		res := o.Take()
 
@@ -814,7 +814,7 @@ func TestOption_TakeIf(t *testing.T) {
 
 		for _, res := range []bool{true, false} {
 			name := fmt.Sprintf("predicate returns %v", res)
-			o := newSome(val)
+			o := Some(val)
 
 			t.Run(name, func(t *testing.T) {
 				called := false
@@ -831,13 +831,13 @@ func TestOption_TakeIf(t *testing.T) {
 				assert.True(t, called, "predicate should have been called")
 
 				if res {
-					expected := newSome(val)
+					expected := Some(val)
 					assert.Equal(t, expected, taken)
 
 					// Original opt should now be a None
 					assert.True(t, o.IsNone())
 				} else {
-					expected := newNone[int]()
+					expected := None[int]()
 					assert.Equal(t, expected, taken)
 
 					// Original opt should have stayed intact
@@ -851,7 +851,7 @@ func TestOption_TakeIf(t *testing.T) {
 	t.Run("None", func(t *testing.T) {
 		for _, res := range []bool{true, false} {
 			name := fmt.Sprintf("predicate returns %v", res)
-			o := newNone[int]()
+			o := None[int]()
 
 			t.Run(name, func(t *testing.T) {
 				f := func(int) bool {
@@ -874,7 +874,7 @@ func TestOption_TakeIf(t *testing.T) {
 func TestOption_String(t *testing.T) {
 	t.Run("Some", func(t *testing.T) {
 		value := fake.Int()
-		o := newSome[int](value)
+		o := Some(value)
 
 		expected := fmt.Sprintf("Some(%v)", value)
 
@@ -882,28 +882,10 @@ func TestOption_String(t *testing.T) {
 	})
 
 	t.Run("None", func(t *testing.T) {
-		o := newNone[int]()
+		o := None[int]()
 
 		expected := "None"
 
 		assert.Equal(t, expected, o.String())
 	})
-}
-
-func newSome[T any](val T) *option[T] {
-	o, ok := Some(val).(*option[T])
-	if !ok {
-		panic("expected *option[T]")
-	}
-
-	return o
-}
-
-func newNone[T any]() *option[T] {
-	o, ok := None[T]().(*option[T])
-	if !ok {
-		panic("expected *option[T]")
-	}
-
-	return o
 }
