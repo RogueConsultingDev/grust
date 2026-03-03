@@ -73,7 +73,7 @@ formatters:
       sections:
         - standard # Standard section: captures all standard packages.
         - default # Default section: contains all imports that could not be matched to another section type.
-        - prefix(github.com/mime-rona/) # Custom section: groups all imports with the specified Prefix.
+        - prefix(github.com/RogueConsultingDev/) # Custom section: groups all imports with the specified Prefix.
         - localmodule # Local module sec
   exclusions:
     generated: lax
