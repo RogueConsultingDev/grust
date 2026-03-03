@@ -168,14 +168,14 @@ func TestMapResultErr_ReturnsANewResultWithMappedResultValue(t *testing.T) {
 func TestResult_IsOk(t *testing.T) {
 	t.Run("Ok", func(t *testing.T) {
 		val := fake.Int()
-		r := newOk[int](val)
+		r := Ok(val)
 
 		assert.True(t, r.IsOk())
 	})
 
 	t.Run("Err", func(t *testing.T) {
 		err := errors.New(fake.RandomStringWithLength(8))
-		r := newErr[any](err)
+		r := Err[any](err)
 
 		assert.False(t, r.IsOk())
 	})
@@ -184,7 +184,7 @@ func TestResult_IsOk(t *testing.T) {
 func TestResult_IsOkAnd(t *testing.T) {
 	t.Run("Ok", func(t *testing.T) {
 		val := fake.Int()
-		r := newOk[int](val)
+		r := Ok(val)
 
 		for _, res := range []bool{true, false} {
 			name := fmt.Sprintf("predicate returns %v", res)
@@ -207,7 +207,7 @@ func TestResult_IsOkAnd(t *testing.T) {
 
 	t.Run("Err", func(t *testing.T) {
 		err := errors.New(fake.RandomStringWithLength(8))
-		r := newErr[int](err)
+		r := Err[int](err)
 
 		for _, res := range []bool{true, false} {
 			name := fmt.Sprintf("predicate returns %v", res)
@@ -227,14 +227,14 @@ func TestResult_IsOkAnd(t *testing.T) {
 func TestResult_IsErr(t *testing.T) {
 	t.Run("Ok", func(t *testing.T) {
 		val := fake.Int()
-		r := newOk[int](val)
+		r := Ok(val)
 
 		assert.False(t, r.IsErr())
 	})
 
 	t.Run("Err", func(t *testing.T) {
 		err := errors.New(fake.RandomStringWithLength(8))
-		r := newErr[any](err)
+		r := Err[any](err)
 
 		assert.True(t, r.IsErr())
 	})
@@ -243,7 +243,7 @@ func TestResult_IsErr(t *testing.T) {
 func TestResult_IsErrAnd(t *testing.T) {
 	t.Run("Ok", func(t *testing.T) {
 		val := fake.Int()
-		r := newOk[int](val)
+		r := Ok(val)
 
 		for _, res := range []bool{true, false} {
 			name := fmt.Sprintf("predicate returns %v", res)
@@ -261,7 +261,7 @@ func TestResult_IsErrAnd(t *testing.T) {
 
 	t.Run("Err", func(t *testing.T) {
 		err := errors.New(fake.RandomStringWithLength(8))
-		r := newErr[int](err)
+		r := Err[int](err)
 
 		for _, res := range []bool{true, false} {
 			name := fmt.Sprintf("predicate returns %v", res)
@@ -286,14 +286,14 @@ func TestResult_IsErrAnd(t *testing.T) {
 func TestResult_Expect(t *testing.T) {
 	t.Run("Ok", func(t *testing.T) {
 		val := fake.Int()
-		r := newOk[int](val)
+		r := Ok(val)
 
 		assert.Equal(t, val, r.Expect(fake.RandomStringWithLength(8)))
 	})
 
 	t.Run("Err", func(t *testing.T) {
 		err := errors.New(fake.RandomStringWithLength(8))
-		r := newErr[any](err)
+		r := Err[any](err)
 
 		msg := fake.RandomStringWithLength(8)
 		expectedError := fmt.Errorf("%s: %w", msg, err)
@@ -306,7 +306,7 @@ func TestResult_Expect(t *testing.T) {
 func TestResult_ExpectErr(t *testing.T) {
 	t.Run("Ok", func(t *testing.T) {
 		val := fake.Int()
-		r := newOk[int](val)
+		r := Ok(val)
 
 		msg := fake.RandomStringWithLength(8)
 		expectedError := fmt.Errorf("%s: %v", msg, val)
@@ -317,7 +317,7 @@ func TestResult_ExpectErr(t *testing.T) {
 
 	t.Run("Err", func(t *testing.T) {
 		err := errors.New(fake.RandomStringWithLength(8))
-		r := newErr[any](err)
+		r := Err[any](err)
 
 		assert.Equal(t, err, r.ExpectErr(fake.RandomStringWithLength(8)))
 	})
@@ -326,14 +326,14 @@ func TestResult_ExpectErr(t *testing.T) {
 func TestResult_Unwrap(t *testing.T) {
 	t.Run("Ok", func(t *testing.T) {
 		val := fake.Int()
-		r := newOk[int](val)
+		r := Ok(val)
 
 		assert.Equal(t, val, r.Unwrap())
 	})
 
 	t.Run("Err", func(t *testing.T) {
 		err := errors.New(fake.RandomStringWithLength(8))
-		r := newErr[any](err)
+		r := Err[any](err)
 
 		expected := fmt.Errorf("called `Result.Unwrap()` on an `Err` value: %w", err)
 		assert.PanicsWithError(t, expected.Error(), func() {
@@ -345,14 +345,14 @@ func TestResult_Unwrap(t *testing.T) {
 func TestResult_UnwrapOr(t *testing.T) {
 	t.Run("Ok", func(t *testing.T) {
 		val := fake.Int()
-		r := newOk[int](val)
+		r := Ok(val)
 
 		assert.Equal(t, val, r.UnwrapOr(fake.Int()))
 	})
 
 	t.Run("Err", func(t *testing.T) {
 		err := errors.New(fake.RandomStringWithLength(8))
-		r := newErr[any](err)
+		r := Err[any](err)
 
 		def := fake.Int()
 
@@ -363,7 +363,7 @@ func TestResult_UnwrapOr(t *testing.T) {
 func TestResult_UnwrapOrElse(t *testing.T) {
 	t.Run("Ok", func(t *testing.T) {
 		val := fake.Int()
-		r := newOk[int](val)
+		r := Ok(val)
 
 		f := func() int {
 			assert.Fail(t, "should not have been called")
@@ -376,7 +376,7 @@ func TestResult_UnwrapOrElse(t *testing.T) {
 
 	t.Run("Err", func(t *testing.T) {
 		err := errors.New(fake.RandomStringWithLength(8))
-		r := newErr[int](err)
+		r := Err[int](err)
 
 		def := fake.Int()
 		f := func() int {
@@ -390,7 +390,7 @@ func TestResult_UnwrapOrElse(t *testing.T) {
 func TestResult_UnwrapOrDefault(t *testing.T) {
 	t.Run("Ok", func(t *testing.T) {
 		val := fake.Int()
-		r := newOk[int](val)
+		r := Ok(val)
 
 		assert.Equal(t, val, r.UnwrapOrDefault())
 	})
@@ -398,10 +398,10 @@ func TestResult_UnwrapOrDefault(t *testing.T) {
 	t.Run("Err", func(t *testing.T) {
 		err := errors.New(fake.RandomStringWithLength(8))
 
-		ri := newErr[int](err)
+		ri := Err[int](err)
 		assert.Equal(t, 0, ri.UnwrapOrDefault())
 
-		rs := newErr[string](err)
+		rs := Err[string](err)
 		assert.Empty(t, rs.UnwrapOrDefault())
 	})
 }
@@ -409,7 +409,7 @@ func TestResult_UnwrapOrDefault(t *testing.T) {
 func TestResult_UnwrapErr(t *testing.T) {
 	t.Run("Ok", func(t *testing.T) {
 		val := fake.Int()
-		r := newOk[int](val)
+		r := Ok(val)
 
 		expected := fmt.Errorf("called `Result.UnwrapErr()` on an `Ok` value: %v", val)
 		assert.PanicsWithError(t, expected.Error(), func() {
@@ -419,7 +419,7 @@ func TestResult_UnwrapErr(t *testing.T) {
 
 	t.Run("Err", func(t *testing.T) {
 		err := errors.New(fake.RandomStringWithLength(8))
-		r := newErr[any](err)
+		r := Err[any](err)
 
 		assert.Equal(t, err, r.UnwrapErr())
 	})
@@ -428,7 +428,7 @@ func TestResult_UnwrapErr(t *testing.T) {
 func TestResult_Inspect(t *testing.T) {
 	t.Run("Ok", func(t *testing.T) {
 		val := fake.Int()
-		r := newOk[int](val)
+		r := Ok(val)
 
 		called := false
 		p := func(v *int) {
@@ -445,7 +445,7 @@ func TestResult_Inspect(t *testing.T) {
 
 	t.Run("Err", func(t *testing.T) {
 		err := errors.New(fake.RandomStringWithLength(8))
-		r := newErr[int](err)
+		r := Err[int](err)
 
 		p := func(*int) {
 			assert.Fail(t, "predicate should not have been called")
@@ -460,7 +460,7 @@ func TestResult_Inspect(t *testing.T) {
 func TestResult_InspectErr(t *testing.T) {
 	t.Run("Ok", func(t *testing.T) {
 		val := fake.Int()
-		r := newOk[int](val)
+		r := Ok(val)
 
 		p := func(error) {
 			assert.Fail(t, "predicate should not have been called")
@@ -473,7 +473,7 @@ func TestResult_InspectErr(t *testing.T) {
 
 	t.Run("Err", func(t *testing.T) {
 		err := errors.New(fake.RandomStringWithLength(8))
-		r := newErr[int](err)
+		r := Err[int](err)
 
 		called := false
 		p := func(e error) {
@@ -492,14 +492,14 @@ func TestResult_InspectErr(t *testing.T) {
 func TestResult_AsOptionValue(t *testing.T) {
 	t.Run("Ok", func(t *testing.T) {
 		val := fake.Int()
-		r := newOk[int](val)
+		r := Ok(val)
 
 		assert.Equal(t, Some(val), r.AsOptionValue())
 	})
 
 	t.Run("Err", func(t *testing.T) {
 		err := errors.New(fake.RandomStringWithLength(8))
-		r := newErr[int](err)
+		r := Err[int](err)
 
 		assert.Equal(t, None[int](), r.AsOptionValue())
 	})
@@ -508,14 +508,14 @@ func TestResult_AsOptionValue(t *testing.T) {
 func TestResult_AsOptionErr(t *testing.T) {
 	t.Run("Ok", func(t *testing.T) {
 		val := fake.Int()
-		r := newOk[int](val)
+		r := Ok(val)
 
 		assert.Equal(t, None[error](), r.AsOptionErr())
 	})
 
 	t.Run("Err", func(t *testing.T) {
 		err := errors.New(fake.RandomStringWithLength(8))
-		r := newErr[int](err)
+		r := Err[int](err)
 
 		assert.Equal(t, Some(err), r.AsOptionErr())
 	})
@@ -524,17 +524,17 @@ func TestResult_AsOptionErr(t *testing.T) {
 func TestResult_WrapErr(t *testing.T) {
 	t.Run("Ok", func(t *testing.T) {
 		val := fake.Int()
-		r := newOk[int](val)
+		r := Ok(val)
 
 		assert.Same(t, r, r.WrapErr(fake.RandomStringWithLength(8)))
 	})
 
 	t.Run("Err", func(t *testing.T) {
 		err := errors.New(fake.RandomStringWithLength(8))
-		r := newErr[int](err)
+		r := Err[int](err)
 
 		msg := fake.RandomStringWithLength(8)
-		expected := newErr[int](fmt.Errorf("%s: %w", msg, err))
+		expected := Err[int](fmt.Errorf("%s: %w", msg, err))
 		assert.Equal(t, expected, r.WrapErr(msg))
 	})
 }
@@ -542,7 +542,7 @@ func TestResult_WrapErr(t *testing.T) {
 func TestResult_Expand(t *testing.T) {
 	t.Run("Ok", func(t *testing.T) {
 		val := fake.Int()
-		r := newOk[int](val)
+		r := Ok(val)
 
 		v, err := r.Expand()
 		require.NoError(t, err)
@@ -551,7 +551,7 @@ func TestResult_Expand(t *testing.T) {
 
 	t.Run("Err", func(t *testing.T) {
 		sourceErr := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
-		r := newErr[int](sourceErr)
+		r := Err[int](sourceErr)
 
 		v, err := r.Expand()
 		require.ErrorContains(t, err, sourceErr.Error())
@@ -562,7 +562,7 @@ func TestResult_Expand(t *testing.T) {
 func TestResult_String(t *testing.T) {
 	t.Run("Ok", func(t *testing.T) {
 		value := fake.Int()
-		r := newOk[int](value)
+		r := Ok(value)
 
 		expected := fmt.Sprintf("Ok(%v)", value)
 
@@ -571,27 +571,9 @@ func TestResult_String(t *testing.T) {
 
 	t.Run("Err", func(t *testing.T) {
 		err := errors.New(fake.RandomStringWithLength(8))
-		r := newErr[int](err)
+		r := Err[int](err)
 
 		expected := fmt.Sprintf("Err(%v)", err)
 		assert.Equal(t, expected, r.String())
 	})
-}
-
-func newOk[T any](val T) *result[T] {
-	r, ok := Ok(val).(*result[T])
-	if !ok {
-		panic("expected *result[T]")
-	}
-
-	return r
-}
-
-func newErr[T any](err error) *result[T] {
-	r, ok := Err[T](err).(*result[T])
-	if !ok {
-		panic("expected *result[T]")
-	}
-
-	return r
 }
