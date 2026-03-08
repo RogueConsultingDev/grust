@@ -1,0 +1,22 @@
+{
+  "name": "grust",
+
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+
+  "customizations": {
+  },
+
+  "securityOpt": ["label=disable"],
+  "mounts": [
+    "type=volume,source=go-cache,target=/go,ro=false"
+  ],
+
+  "workspaceMount": "type=bind,source=${localWorkspaceFolder},target=/src,ro=false",
+  "workspaceFolder": "/src",
+
+  "runArgs": [
+    "--net=host"
+  ]
+}
