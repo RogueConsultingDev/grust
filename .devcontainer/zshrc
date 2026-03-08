@@ -1,0 +1,42 @@
+autoload -Uz compinit
+compinit
+
+PROMPT="%F{green}%n%f@%F{magenta}%m%f %F{blue}%~%f %# "
+EDITOR=vim
+
+# Add a visual menu select
+zstyle ':completion:*' menu select
+# Add completion for cd ..
+zstyle ':completion:*' special-dirs true
+# Case insensitive completion
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+
+setopt correct # Enable autocorrect
+
+bindkey "^[[1~" beginning-of-line # Home
+bindkey "^[[4~" end-of-line       # End
+bindkey "^[[1;5D" backward-word   # Ctrl-left
+bindkey "^[[1;5C" forward-word    # Ctrl-right
+
+HISTSIZE=10000
+SAVEHIST=10000
+HISTFILE=~/.zsh_history
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_REDUCE_BLANKS
+setopt HIST_IGNORE_SPACE
+
+autoload -U history-search-end
+zle -N history-beginning-search-backward-end history-search-end
+zle -N history-beginning-search-forward-end history-search-end
+
+# Press Ctrl-v + <key> to get the code
+bindkey "^[[A" history-beginning-search-backward-end
+bindkey "^[[B" history-beginning-search-forward-end
+
+# Aliases
+alias ls='ls --color=auto -v --group-directories-first'
+alias ll='ls -lh'
+alias la='ls -A'
+alias lf='ls -lhA'
+
+# vim: set ft=zsh

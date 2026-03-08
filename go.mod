@@ -1,6 +1,6 @@
 module github.com/RogueConsultingDev/grust
 
-go 1.24.13
+go 1.27
 
 require (
 	github.com/jaswdr/faker/v2 v2.9.1
