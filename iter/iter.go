@@ -28,6 +28,19 @@ func New[T any](values []T) *Iterator[T, any] {
 	}
 }
 
+// NewP creates an iterator to pointers of values from the given slice.
+func NewP[T any](values []T) *Iterator[*T, any] {
+	return &Iterator[*T, any]{
+		it: func(yield func(*T, error) bool) {
+			for i := range values {
+				if !yield(&values[i], nil) {
+					return
+				}
+			}
+		},
+	}
+}
+
 // New2 creates an iterator from the given slice, with a different secondary type.
 // This is useful for creating a mapping iterator.
 
@@ -37,6 +50,22 @@ func New2[T any, U any](values []T) *Iterator[T, U] {
 		it: func(yield func(T, error) bool) {
 			for i := range values {
 				if !yield(values[i], nil) {
+					return
+				}
+			}
+		},
+	}
+}
+
+// NewP2 creates an iterator to pointers of values from the given slice, with a different secondary type.
+// This is useful for creating a mapping iterator.
+
+// Deprecated: Un-necessary since generic methods.
+func NewP2[T any, U any](values []T) *Iterator[*T, U] {
+	return &Iterator[*T, U]{
+		it: func(yield func(*T, error) bool) {
+			for i := range values {
+				if !yield(&values[i], nil) {
 					return
 				}
 			}
