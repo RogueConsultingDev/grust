@@ -15,10 +15,10 @@ func TestEnumerate_ReturnsValuesAndTheirIndex(t *testing.T) {
 	output, err := NewEnumeratorFrom(iter).Collect()
 	require.NoError(t, err)
 
-	expected := []Enumerator[*string]{
-		{0, &values[0]},
-		{1, &values[1]},
-		{2, &values[2]},
+	expected := []Enumerator[string]{
+		{0, values[0]},
+		{1, values[1]},
+		{2, values[2]},
 	}
 	assert.Equal(t, expected, output)
 }
@@ -27,11 +27,11 @@ func TestEnumerate_StopsOnError(t *testing.T) {
 	values := []int{1, 2, 3}
 	iter := New2[int, int](values)
 
-	mapper := func(i *int) (int, error) {
+	mapper := func(i int) (int, error) {
 		// We will error on value 2, so mapper should never be called with value 3
-		assert.LessOrEqualf(t, *i, 2, "Mapper was called with unexpected value: %d", i)
+		assert.LessOrEqualf(t, i, 2, "Mapper was called with unexpected value: %d", i)
 
-		if *i == 2 {
+		if i == 2 {
 			return 0, errors.New("Invalid value")
 		}
 

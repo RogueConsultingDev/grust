@@ -1,20 +1,21 @@
 package it
 
-func (i *Iterator[T, U]) Map(f func(T) (U, error)) *Iterator[*U, any] {
-	it := func(yield func(*U, error) bool) {
+func (i *Iterator[T, U]) Map(f func(T) (U, error)) *Iterator[U, any] {
+	it := func(yield func(U, error) bool) {
 		for v, err := range i.it {
 			if err != nil {
-				yield(nil, err)
+				var zero U
+				yield(zero, err)
 
 				return
 			}
 
 			u, err := f(v)
-			if !yield(&u, err) {
+			if !yield(u, err) {
 				return
 			}
 		}
 	}
 
-	return &Iterator[*U, any]{it}
+	return &Iterator[U, any]{it}
 }

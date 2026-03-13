@@ -13,33 +13,33 @@ func TestFilterMap_MapsAndFiltersElements(t *testing.T) {
 	values := []int{1, 2, 3, 4, 5}
 	iter := New2[int, string](values)
 
-	filterMap := func(i *int) (string, bool, error) {
-		if *i%2 != 0 {
+	filterMap := func(i int) (string, bool, error) {
+		if i%2 != 0 {
 			return "", false, nil
 		}
 
-		return strconv.Itoa(*i * *i), true, nil
+		return strconv.Itoa(i * i), true, nil
 	}
 
 	output, err := iter.FilterMap(filterMap).Collect()
 
 	require.NoError(t, err)
 
-	assert.Equal(t, []*string{ptr("4"), ptr("16")}, output)
+	assert.Equal(t, []string{"4", "16"}, output)
 }
 
 func TestFilterMap_IsLazy(t *testing.T) {
 	values := []int{1, 2, 3}
 	iter := New2[int, int](values)
 
-	filterMap := func(i *int) (int, bool, error) {
-		assert.LessOrEqualf(t, *i, 2, "filter was called with unexpected value: %d", i)
+	filterMap := func(i int) (int, bool, error) {
+		assert.LessOrEqualf(t, i, 2, "filter was called with unexpected value: %d", i)
 
-		return *i, true, nil
+		return i, true, nil
 	}
 
 	for v := range iter.FilterMap(filterMap).it {
-		if *v == 2 {
+		if v == 2 {
 			break
 		}
 	}
@@ -49,14 +49,14 @@ func TestFilterMap_StopsOnError(t *testing.T) {
 	values := []int{1, 2, 3}
 	iter := New2[int, int](values)
 
-	filterMap := func(i *int) (int, bool, error) {
-		assert.LessOrEqualf(t, *i, 2, "filter was called with unexpected value: %d", i)
+	filterMap := func(i int) (int, bool, error) {
+		assert.LessOrEqualf(t, i, 2, "filter was called with unexpected value: %d", i)
 
-		if *i == 2 {
+		if i == 2 {
 			return 0, false, errors.New("Invalid value")
 		}
 
-		return *i, true, nil
+		return i, true, nil
 	}
 
 	output, err := iter.FilterMap(filterMap).Collect()

@@ -14,7 +14,7 @@ func TestTake_YieldsTheFirstNElements(t *testing.T) {
 	output, err := New(values).Take(3).Collect()
 
 	require.NoError(t, err)
-	assert.Equal(t, []*int{ptr(1), ptr(2), ptr(3)}, output)
+	assert.Equal(t, []int{1, 2, 3}, output)
 }
 
 func TestTake_StopsIfUnderlyingIteratorHasNoMoreElements(t *testing.T) {
@@ -23,14 +23,14 @@ func TestTake_StopsIfUnderlyingIteratorHasNoMoreElements(t *testing.T) {
 	output, err := New(values).Take(3).Collect()
 
 	require.NoError(t, err)
-	assert.Equal(t, []*int{ptr(1), ptr(2)}, output)
+	assert.Equal(t, []int{1, 2}, output)
 
 	values = []int{}
 
 	output, err = New(values).Take(3).Collect()
 
 	require.NoError(t, err)
-	assert.Equal(t, []*int{}, output)
+	assert.Equal(t, []int{}, output)
 }
 
 func TestTake_StopsAfterN(t *testing.T) {
