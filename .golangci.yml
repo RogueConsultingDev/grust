@@ -32,7 +32,6 @@ linters:
     staticcheck:
       checks:
         - all
-        - -ST1000
     wsl_v5:
       default: default
       disable:
