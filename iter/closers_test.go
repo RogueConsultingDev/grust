@@ -9,6 +9,35 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestIter_ReturnsTheRawIterator(t *testing.T) {
+	iter := &Iterator[int, any]{
+		it: func(yield func(int, error) bool) {
+			if !yield(1, nil) {
+				return
+			}
+
+			if !yield(42, errors.New("some error")) {
+				return
+			}
+
+			if !yield(2, nil) {
+				return
+			}
+		},
+	}
+
+	var values []int
+	var errs []error
+
+	for val, err := range iter.Iter() {
+		values = append(values, val)
+		errs = append(errs, err)
+	}
+
+	assert.Equal(t, []int{1, 42, 2}, values)
+	assert.Equal(t, []error{nil, errors.New("some error"), nil}, errs)
+}
+
 func TestCollect_CollectsTheIterInASlice(t *testing.T) {
 	values := []int{1, 2, 3, 4, 5}
 	output, err := New(values).Collect()
