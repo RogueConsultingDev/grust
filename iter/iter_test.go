@@ -30,6 +30,32 @@ func TestNew_ReturnsAnIteratorOverTheValues(t *testing.T) {
 	iter.Map(func(int) (any, error) { return 0, nil })
 }
 
+func TestNewP_ReturnsAnIteratorOverPointersToTheValues(t *testing.T) {
+	values := []int{1, 2, 3, 4, 5}
+	iter := NewP(values)
+
+	idx := 0
+	for v := range iter.it {
+		assert.Equal(t, values[idx], *v)
+		idx += 1
+	}
+
+	// The 2nd type of the iterator should be `any`.
+	// This code compiling is the test.
+	iter.Map(func(*int) (any, error) { return 0, nil })
+}
+
+func TestNewP_DoesntAllocate(t *testing.T) {
+	values := []int{1, 2, 3, 4, 5}
+	iter := NewP(values)
+
+	idx := 0
+	for v := range iter.it {
+		assert.Same(t, &values[idx], v, "%p != %p", &values[idx], v)
+		idx += 1
+	}
+}
+
 func TestNew2_ReturnsAnIteratorOverTheValuesWithADifferent2ndType(t *testing.T) {
 	values := []int{1, 2, 3, 4, 5}
 	iter := New2[int, string](values)
@@ -43,6 +69,32 @@ func TestNew2_ReturnsAnIteratorOverTheValuesWithADifferent2ndType(t *testing.T) 
 	// The 2nd type of the iterator should be the specified one.
 	// This code compiling is the test.
 	iter.Map(func(int) (string, error) { return "", nil })
+}
+
+func TestNewP2_ReturnsAnIteratorOverPointersToTheValues(t *testing.T) {
+	values := []int{1, 2, 3, 4, 5}
+	iter := NewP2[int, string](values)
+
+	idx := 0
+	for v := range iter.it {
+		assert.Equal(t, values[idx], *v)
+		idx += 1
+	}
+
+	// The 2nd type of the iterator should be the specified one.
+	// This code compiling is the test.
+	iter.Map(func(*int) (string, error) { return "", nil })
+}
+
+func TestNewP2_DoesntAllocate(t *testing.T) {
+	values := []int{1, 2, 3, 4, 5}
+	iter := NewP2[int, string](values)
+
+	idx := 0
+	for v := range iter.it {
+		assert.Same(t, &values[idx], v, "%p != %p", &values[idx], v)
+		idx += 1
+	}
 }
 
 func TestReversed_ReturnsAnIteratorOverTheValuesInReverseOrder(t *testing.T) {
