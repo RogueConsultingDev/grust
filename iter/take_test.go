@@ -39,6 +39,7 @@ func TestTake_StopsAfterN(t *testing.T) {
 			if !yield(1, nil) {
 				return
 			}
+
 			require.Fail(t, "Should not reach this point")
 		},
 	}
@@ -53,9 +54,11 @@ func TestTake_PropagatesError(t *testing.T) {
 			if !yield(1, nil) {
 				return
 			}
+
 			if !yield(42, errors.New("some error")) {
 				return
 			}
+
 			require.Fail(t, "Should not reach this point")
 		},
 	}

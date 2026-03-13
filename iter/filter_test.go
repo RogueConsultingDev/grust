@@ -46,9 +46,11 @@ func TestFilter_PropagatesError(t *testing.T) {
 			if !yield(1, nil) {
 				return
 			}
+
 			if !yield(0, errors.New("some error")) {
 				return
 			}
+
 			require.Fail(t, "Should not reach this point")
 		},
 	}
@@ -67,25 +69,25 @@ func TestFilter_PropagatesError(t *testing.T) {
 
 func Benchmark_Filter(b *testing.B) {
 	type S struct {
-		id  int
-		i   int
-		s   string
-		b   bool
-		i32 int32
-		i64 int64
-		u32 uint32
-		u64 uint64
-		f32 float32
-		f64 float64
+		ID  int
+		I   int
+		S   string
+		B   bool
+		I32 int32
+		I64 int64
+		U32 uint32
+		U64 uint64
+		F32 float32
+		F64 float64
 	}
 
 	values := make([]S, 100)
 	for i := range values {
 		fake.Struct().Fill(&values[i])
-		(&values[i]).id = i
+		(&values[i]).ID = i
 	}
 
-	filter := New(values).Filter(func(s *S) bool { return s.id%2 == 0 })
+	filter := New(values).Filter(func(s *S) bool { return s.ID%2 == 0 })
 
 	b.ReportAllocs()
 

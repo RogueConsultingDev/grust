@@ -5,7 +5,7 @@ import (
 	"iter"
 )
 
-// Iter returns the raw iterator
+// Iter returns the raw iterator.
 func (i *Iterator[T, U]) Iter() iter.Seq2[T, error] {
 	return i.it
 }
@@ -160,7 +160,8 @@ func (i *Iterator[T, U]) ForEach(f func(T)) error {
 	return nil
 }
 
-// Fold applies a function against an accumulator and each element in the iterator, from left to right, to reduce it to a single value.
+// Fold applies a function against an accumulator and each element in the iterator, from left to right, to reduce it to
+// a single value.
 func (i *Iterator[T, U]) Fold(init U, adder func(cur U, item T) U) (U, error) {
 	current := init
 

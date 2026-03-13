@@ -30,10 +30,13 @@ func TestCollect_PropagatesError(t *testing.T) {
 			if !yield(1, nil) {
 				return
 			}
+
 			if !yield(42, errors.New("some error")) {
 				return
 			}
+
 			require.Fail(t, "Should not reach this point")
+
 			if !yield(2, nil) {
 				return
 			}
@@ -67,10 +70,13 @@ func TestReversed_PropagatesError(t *testing.T) {
 			if !yield(1, nil) {
 				return
 			}
+
 			if !yield(42, errors.New("some error")) {
 				return
 			}
+
 			require.Fail(t, "Should not reach this point")
+
 			if !yield(2, nil) {
 				return
 			}
@@ -119,7 +125,9 @@ func TestAny_StopsAtTheFirstMatchingElement(t *testing.T) {
 			if !yield(1, nil) {
 				return
 			}
+
 			require.Fail(t, "Should not reach this point")
+
 			if !yield(42, errors.New("some error")) {
 				return
 			}
@@ -137,6 +145,7 @@ func TestAny_PropagatesError(t *testing.T) {
 			if !yield(42, errors.New("some error")) {
 				return
 			}
+
 			require.Fail(t, "Should not reach this point")
 		},
 	}
@@ -177,7 +186,9 @@ func TestAll_StopsAtTheFirstNonMatchingElement(t *testing.T) {
 			if !yield(1, nil) {
 				return
 			}
+
 			require.Fail(t, "Should not reach this point")
+
 			if !yield(42, errors.New("some error")) {
 				return
 			}
@@ -195,6 +206,7 @@ func TestAll_PropagatesError(t *testing.T) {
 			if !yield(42, errors.New("some error")) {
 				return
 			}
+
 			require.Fail(t, "Should not reach this point")
 		},
 	}
@@ -212,6 +224,7 @@ func TestFirst_ReturnsTheFirstElementOfTheIter(t *testing.T) {
 			if !yield(val, nil) {
 				return
 			}
+
 			require.Fail(t, "Should not reach this point")
 		},
 	}
@@ -232,6 +245,7 @@ func TestFirst_PropagatesError(t *testing.T) {
 			if !yield(42, errors.New("some error")) {
 				return
 			}
+
 			require.Fail(t, "Should not reach this point")
 		},
 	}
@@ -259,6 +273,7 @@ func TestLast_PropagatesError(t *testing.T) {
 			if !yield(42, errors.New("some error")) {
 				return
 			}
+
 			require.Fail(t, "Should not reach this point")
 		},
 	}
@@ -295,9 +310,11 @@ func TestFind_PropagatesError(t *testing.T) {
 			if !yield(1, nil) {
 				return
 			}
+
 			if !yield(42, errors.New("some error")) {
 				return
 			}
+
 			require.Fail(t, "Should not reach this point")
 		},
 	}
@@ -335,9 +352,11 @@ func TestPosition_PropagatesError(t *testing.T) {
 			if !yield(1, nil) {
 				return
 			}
+
 			if !yield(42, errors.New("some error")) {
 				return
 			}
+
 			require.Fail(t, "Should not reach this point")
 		},
 	}
@@ -374,9 +393,11 @@ func TestFold_PropagatesError(t *testing.T) {
 			if !yield(1, nil) {
 				return
 			}
+
 			if !yield(42, errors.New("some error")) {
 				return
 			}
+
 			require.Fail(t, "Should not reach this point")
 		},
 	}
@@ -423,10 +444,13 @@ func TestForEach_StopsOnError(t *testing.T) {
 			if !yield(1, nil) {
 				return
 			}
+
 			if !yield(42, errors.New("some error")) {
 				return
 			}
+
 			require.Fail(t, "Should not reach this point")
+
 			if !yield(2, nil) {
 				return
 			}
@@ -453,10 +477,13 @@ func TestCopied_PropagatesError(t *testing.T) {
 			if !yield(ptr(1), nil) {
 				return
 			}
+
 			if !yield(ptr(42), errors.New("some error")) {
 				return
 			}
+
 			require.Fail(t, "Should not reach this point")
+
 			if !yield(ptr(2), nil) {
 				return
 			}

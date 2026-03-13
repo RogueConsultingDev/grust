@@ -70,9 +70,11 @@ func TestFilterMap_PropagatesError(t *testing.T) {
 			if !yield(1, nil) {
 				return
 			}
+
 			if !yield(0, errors.New("some error")) {
 				return
 			}
+
 			require.Fail(t, "Should not reach this point")
 		},
 	}

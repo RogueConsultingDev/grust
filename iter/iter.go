@@ -1,3 +1,4 @@
+// Package it implements Rust-style Iterators
 package it
 
 import (
@@ -230,7 +231,8 @@ func Zip[T any, U any](a []T, b []U) *Iterator[Tuple[T, U], any] {
 	}
 }
 
-// ZipEq creates an iterator that yields elements of both slices, one by one, as long as both slices are the same length.
+// ZipEq creates an iterator that yields elements of both slices, one by one, as long as both slices are the same
+// length.
 func ZipEq[T any, U any](a []T, b []U) *Iterator[Tuple[T, U], any] {
 	return &Iterator[Tuple[T, U], any]{
 		it: func(yield func(Tuple[T, U], error) bool) {

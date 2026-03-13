@@ -48,9 +48,11 @@ linters:
           - gosec
         path: _test\.go
       - linters:  # Returning "any" is the whole point
-          - interfacebloat
           - ireturn
         path: safetypes/.*\.go
+      - linters:  # Returning "any" is the whole point
+          - ireturn
+        path: iter/.*\.go
       - linters:  # TODO: REMOVE ME
           - revive
         path: iter/.*\.go
