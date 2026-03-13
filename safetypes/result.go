@@ -36,6 +36,8 @@ func ResultOf[T any](val T, err error) *Result[T] {
 
 // MapResult maps a Result<T> to Result<U, E> by applying a function to a contained Ok value, leaving an Err value
 // untouched.
+//
+// Deprecated: Use Result[T].Map()
 func MapResult[T any, U any](res *Result[T], f func(T) U) *Result[U] {
 	if res.IsErr() {
 		return Err[U](res.UnwrapErr())
@@ -45,6 +47,8 @@ func MapResult[T any, U any](res *Result[T], f func(T) U) *Result[U] {
 }
 
 // MapResultOr returns the provided default (if Err), or applies a function to the contained value (if Ok).
+//
+// Deprecated: Use Result[T].MapOr()
 func MapResultOr[T any, U any](res *Result[T], def U, f func(T) U) U {
 	if res.IsErr() {
 		return def
@@ -55,6 +59,8 @@ func MapResultOr[T any, U any](res *Result[T], def U, f func(T) U) U {
 
 // MapResultOrElse maps a Result<T> to U by applying fallback function default to a contained Err value, or function
 // f to a contained Ok value.
+//
+// Deprecated: Use Result[T].MapOrElse()
 func MapResultOrElse[T any, U any](
 	res *Result[T],
 	factory func() U,
@@ -69,6 +75,8 @@ func MapResultOrElse[T any, U any](
 
 // MapResultErr maps a Result<T> to Result<T, F> by applying a function to a contained Err value, leaving an Ok value
 // untouched.
+//
+// Deprecated: Use Result[T].MapErr()
 func MapResultErr[T any](res *Result[T], f func(error) error) *Result[T] {
 	if res.IsOk() {
 		return res
@@ -102,6 +110,45 @@ func (r *Result[T]) IsErr() bool {
 // IsErrAnd returns `true` if the result is Err and the value inside of it matches a predicate.
 func (r *Result[T]) IsErrAnd(f func(error) bool) bool {
 	return !r.ok && f(r.err)
+}
+
+// Map maps a Result<T> to Result<U, E> by applying a function to a contained Ok value, leaving an Err value
+// untouched.
+func (r *Result[T]) Map[U any](f func(T) U) *Result[U] {
+	if !r.ok {
+		return Err[U](r.UnwrapErr())
+	}
+
+	return Ok(f(r.Unwrap()))
+}
+
+// MapOr returns the provided default (if Err), or applies a function to the contained value (if Ok).
+func (r *Result[T]) MapOr[U any](def U, f func(T) U) U {
+	if !r.ok {
+		return def
+	}
+
+	return f(r.Unwrap())
+}
+
+// MapOrElse maps a Result<T> to U by applying fallback function default to a contained Err value, or function
+// f to a contained Ok value.
+func (r *Result[T]) MapOrElse[U any](factory func() U, mapper func(T) U) U {
+	if !r.ok {
+		return factory()
+	}
+
+	return mapper(r.Unwrap())
+}
+
+// MapErr maps a Result<T> to Result<T, F> by applying a function to a contained Err value, leaving an Ok value
+// untouched.
+func (r *Result[T]) MapErr(f func(error) error) *Result[T] {
+	if r.ok {
+		return r
+	}
+
+	return Err[T](f(r.UnwrapErr()))
 }
 
 // Expect returns the contained Ok value, consuming the self value. Panics if the value is an Err, with a panic
