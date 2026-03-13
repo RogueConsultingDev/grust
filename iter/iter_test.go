@@ -21,24 +21,13 @@ func TestNew_ReturnsAnIteratorOverTheValues(t *testing.T) {
 
 	idx := 0
 	for v := range iter.it {
-		assert.Equal(t, values[idx], *v)
+		assert.Equal(t, values[idx], v)
 		idx += 1
 	}
 
 	// The 2nd type of the iterator should be `any`.
 	// This code compiling is the test.
-	iter.Map(func(*int) (any, error) { return 0, nil })
-}
-
-func TestNew_DoesntAllocate(t *testing.T) {
-	values := []int{1, 2, 3, 4, 5}
-	iter := New(values)
-
-	idx := 0
-	for v := range iter.it {
-		assert.Same(t, &values[idx], v, "%p != %p", &values[idx], v)
-		idx += 1
-	}
+	iter.Map(func(int) (any, error) { return 0, nil })
 }
 
 func TestNew2_ReturnsAnIteratorOverTheValuesWithADifferent2ndType(t *testing.T) {
@@ -47,24 +36,13 @@ func TestNew2_ReturnsAnIteratorOverTheValuesWithADifferent2ndType(t *testing.T) 
 
 	idx := 0
 	for v := range iter.it {
-		assert.Equal(t, values[idx], *v)
+		assert.Equal(t, values[idx], v)
 		idx += 1
 	}
 
 	// The 2nd type of the iterator should be the specified one.
 	// This code compiling is the test.
-	iter.Map(func(*int) (string, error) { return "", nil })
-}
-
-func TestNew2_DoesntAllocate(t *testing.T) {
-	values := []int{1, 2, 3, 4, 5}
-	iter := New(values)
-
-	idx := 0
-	for v := range iter.it {
-		assert.Same(t, &values[idx], v, "%p != %p", &values[idx], v)
-		idx += 1
-	}
+	iter.Map(func(int) (string, error) { return "", nil })
 }
 
 func TestReversed_ReturnsAnIteratorOverTheValuesInReverseOrder(t *testing.T) {
@@ -73,35 +51,22 @@ func TestReversed_ReturnsAnIteratorOverTheValuesInReverseOrder(t *testing.T) {
 
 	idx := 0
 	for v := range iter.it {
-		assert.Equal(t, values[4-idx], *v)
-		idx += 1
-	}
-}
-
-func TestReversed_DoesntAllocate(t *testing.T) {
-	values := []int{1, 2, 3, 4, 5}
-	iter := Reversed(values)
-
-	idx := 0
-	for v := range iter.it {
-		assert.Same(t, &values[4-idx], v, "%p != %p", &values[4-idx], v)
+		assert.Equal(t, values[4-idx], v)
 		idx += 1
 	}
 }
 
 func TestFrom_ReturnsANewIteratorWithADifferent2ndType(t *testing.T) {
 	values := []int{1, 2, 3, 4, 5}
-	iter := New2[int, string](values).Map(func(i *int) (string, error) {
-		return strconv.Itoa(*i), nil
+	iter := New2[int, string](values).Map(func(i int) (string, error) {
+		return strconv.Itoa(i), nil
 	})
 
-	iter2 := From[*string, int](iter).Map(func(s *string) (int, error) {
-		return strconv.Atoi(*s)
-	})
+	iter2 := From[string, int](iter).Map(strconv.Atoi)
 
 	idx := 0
 	for v := range iter2.it {
-		assert.Equal(t, &values[idx], v)
+		assert.Equal(t, values[idx], v)
 		idx += 1
 	}
 }
@@ -262,7 +227,7 @@ func TestCycle_IteratesOverTheSliceOverAndOverAgain(t *testing.T) {
 	idx := 0
 
 	for v := range Cycle(sl).it {
-		require.Equal(t, &expected[idx], v)
+		require.Equal(t, expected[idx], v)
 
 		idx += 1
 		if idx == len(expected) {
@@ -281,7 +246,7 @@ func TestChain_IteratesOverMultipleSlices(t *testing.T) {
 	idx := 0
 
 	for v := range Chain(sl1, sl2, sl3).it {
-		require.Equal(t, &expected[idx], v)
+		require.Equal(t, expected[idx], v)
 
 		idx += 1
 	}
@@ -312,8 +277,8 @@ func TestProduct_ReturnsTheCartesianProductOfTwoIterables(t *testing.T) {
 	idx := 0
 
 	for v := range Product(p, q).it {
-		require.Equal(t, expected[idx].A, *v.A)
-		require.Equal(t, expected[idx].B, *v.B)
+		require.Equal(t, expected[idx].A, v.A)
+		require.Equal(t, expected[idx].B, v.B)
 
 		idx += 1
 	}

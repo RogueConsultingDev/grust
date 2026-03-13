@@ -16,11 +16,11 @@ type Tuple[T any, U any] struct {
 }
 
 // New creates an iterator from the given slice.
-func New[T any](values []T) *Iterator[*T, any] {
-	return &Iterator[*T, any]{
-		it: func(yield func(*T, error) bool) {
+func New[T any](values []T) *Iterator[T, any] {
+	return &Iterator[T, any]{
+		it: func(yield func(T, error) bool) {
 			for i := range values {
-				if !yield(&values[i], nil) {
+				if !yield(values[i], nil) {
 					return
 				}
 			}
@@ -32,11 +32,11 @@ func New[T any](values []T) *Iterator[*T, any] {
 // This is useful for creating a mapping iterator.
 
 // Deprecated: Un-necessary since generic methods.
-func New2[T any, U any](values []T) *Iterator[*T, U] {
-	return &Iterator[*T, U]{
-		it: func(yield func(*T, error) bool) {
+func New2[T any, U any](values []T) *Iterator[T, U] {
+	return &Iterator[T, U]{
+		it: func(yield func(T, error) bool) {
 			for i := range values {
-				if !yield(&values[i], nil) {
+				if !yield(values[i], nil) {
 					return
 				}
 			}
@@ -45,12 +45,12 @@ func New2[T any, U any](values []T) *Iterator[*T, U] {
 }
 
 // Reversed creates an iterator from the given slice in reverse order.
-func Reversed[T any](values []T) *Iterator[*T, any] {
-	return &Iterator[*T, any]{
-		it: func(yield func(*T, error) bool) {
+func Reversed[T any](values []T) *Iterator[T, any] {
+	return &Iterator[T, any]{
+		it: func(yield func(T, error) bool) {
 			n := len(values) - 1
 			for i := range values {
-				if !yield(&values[n-i], nil) {
+				if !yield(values[n-i], nil) {
 					return
 				}
 			}
@@ -167,12 +167,12 @@ func Range(start int, end int) *Iterator[int, any] {
 }
 
 // Cycle creates an iterator that endlessly cycles through the given values.
-func Cycle[T any](values []T) *Iterator[*T, any] {
-	return &Iterator[*T, any]{
-		it: func(yield func(*T, error) bool) {
+func Cycle[T any](values []T) *Iterator[T, any] {
+	return &Iterator[T, any]{
+		it: func(yield func(T, error) bool) {
 			for {
 				for i := range values {
-					if !yield(&values[i], nil) {
+					if !yield(values[i], nil) {
 						return
 					}
 				}
@@ -182,12 +182,12 @@ func Cycle[T any](values []T) *Iterator[*T, any] {
 }
 
 // Chain creates an iterator that yields all elements from the given slices.
-func Chain[T any](slices ...[]T) *Iterator[*T, any] {
-	return &Iterator[*T, any]{
-		it: func(yield func(*T, error) bool) {
+func Chain[T any](slices ...[]T) *Iterator[T, any] {
+	return &Iterator[T, any]{
+		it: func(yield func(T, error) bool) {
 			for _, s := range slices {
 				for i := range s {
-					if !yield(&s[i], nil) {
+					if !yield(s[i], nil) {
 						return
 					}
 				}
@@ -197,13 +197,13 @@ func Chain[T any](slices ...[]T) *Iterator[*T, any] {
 }
 
 // Product creates an iterator that yields all possible pairs of elements from the given slices.
-func Product[T any, U any](p []T, q []U) *Iterator[*Tuple[*T, *U], any] {
-	return &Iterator[*Tuple[*T, *U], any]{
-		it: func(yield func(*Tuple[*T, *U], error) bool) {
+func Product[T any, U any](p []T, q []U) *Iterator[Tuple[T, U], any] {
+	return &Iterator[Tuple[T, U], any]{
+		it: func(yield func(Tuple[T, U], error) bool) {
 			for i := range p {
 				for j := range q {
-					t := Tuple[*T, *U]{&p[i], &q[j]}
-					if !yield(&t, nil) {
+					t := Tuple[T, U]{p[i], q[j]}
+					if !yield(t, nil) {
 						return
 					}
 				}

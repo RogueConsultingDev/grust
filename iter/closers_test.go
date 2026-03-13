@@ -46,10 +46,7 @@ func TestCollect_CollectsTheIterInASlice(t *testing.T) {
 	assert.Len(t, output, len(values))
 
 	for i, v := range output {
-		assert.Equal(t, values[i], *v)
-
-		// They should point to the same value
-		assert.Same(t, &values[i], v)
+		assert.Equal(t, values[i], v)
 	}
 }
 
@@ -86,10 +83,7 @@ func TestReversed_CollectsTheIterInASliceInReverseOrder(t *testing.T) {
 	assert.Len(t, output, len(values))
 
 	for i, v := range output {
-		assert.Equal(t, values[4-i], *v)
-
-		// They should point to the same value
-		assert.Same(t, &values[4-i], v)
+		assert.Equal(t, values[4-i], v)
 	}
 }
 
@@ -119,7 +113,7 @@ func TestReversed_PropagatesError(t *testing.T) {
 }
 
 func TestAny_ReturnsTrueOnFirstElementThatMatchesThePredicate(t *testing.T) {
-	predicate := func(*int) bool { return true }
+	predicate := func(int) bool { return true }
 
 	// Empty slice doesn't have any values
 	output, err := New([]int{}).Any(predicate)
@@ -132,7 +126,7 @@ func TestAny_ReturnsTrueOnFirstElementThatMatchesThePredicate(t *testing.T) {
 	assert.True(t, output)
 
 	// A slice with only a nil pointer still has a value
-	output, err = New([]*int{nil}).Any(func(i **int) bool { return true })
+	output, err = New([]*int{nil}).Any(func(i *int) bool { return true })
 	require.NoError(t, err)
 	assert.True(t, output)
 
@@ -143,7 +137,7 @@ func TestAny_ReturnsTrueOnFirstElementThatMatchesThePredicate(t *testing.T) {
 }
 
 func TestAny_ReturnsFalseIfNoElementsMatchThePredicate(t *testing.T) {
-	output, err := New([]int{1, 3, 5}).Any(func(v *int) bool { return *v%2 == 0 })
+	output, err := New([]int{1, 3, 5}).Any(func(v int) bool { return v%2 == 0 })
 	require.NoError(t, err)
 	assert.False(t, output)
 }
@@ -185,7 +179,7 @@ func TestAny_PropagatesError(t *testing.T) {
 }
 
 func TestAll_ReturnsTrueIfAllElementsMatchThePredicate(t *testing.T) {
-	predicate := func(*int) bool { return true }
+	predicate := func(int) bool { return true }
 
 	// Empty slice doesn't have any values, so nothing _doesn't_ match
 	output, err := New([]int{}).All(predicate)
@@ -204,7 +198,7 @@ func TestAll_ReturnsTrueIfAllElementsMatchThePredicate(t *testing.T) {
 }
 
 func TestAll_ReturnsFalseIfAnyElementDoesntMatchThePredicate(t *testing.T) {
-	output, err := New([]int{1, 2, 3, 4, 5}).All(func(i *int) bool { return *i < 5 })
+	output, err := New([]int{1, 2, 3, 4, 5}).All(func(i int) bool { return i < 5 })
 	require.NoError(t, err)
 	assert.False(t, output)
 }
@@ -265,7 +259,7 @@ func TestFirst_ReturnsTheFirstElementOfTheIter(t *testing.T) {
 func TestFirst_ReturnsAnErrorIfIteratorIsEmpty(t *testing.T) {
 	output, err := New([]int{}).First()
 	require.ErrorContains(t, err, "empty iterator")
-	assert.Nil(t, output)
+	assert.Zero(t, output)
 }
 
 func TestFirst_PropagatesError(t *testing.T) {
@@ -287,13 +281,13 @@ func TestFirst_PropagatesError(t *testing.T) {
 func TestLast_ReturnsTheFirstElementOfTheIter(t *testing.T) {
 	output, err := New([]int{1, 2, 3, 4, 5}).Last()
 	require.NoError(t, err)
-	assert.Equal(t, 5, *output)
+	assert.Equal(t, 5, output)
 }
 
 func TestLast_ReturnsAnErrorIfIteratorIsEmpty(t *testing.T) {
 	output, err := New([]int{}).Last()
 	require.ErrorContains(t, err, "empty iterator")
-	assert.Nil(t, output)
+	assert.Zero(t, output)
 }
 
 func TestLast_PropagatesError(t *testing.T) {
@@ -315,18 +309,18 @@ func TestLast_PropagatesError(t *testing.T) {
 func TestFind_ReturnsTheFirstElementThatMatches(t *testing.T) {
 	values := []int{1, 2, 3, 4, 5}
 
-	output, ok, err := New(values).Find(func(v *int) bool { return *v%2 == 0 })
+	output, ok, err := New(values).Find(func(v int) bool { return v%2 == 0 })
 	require.NoError(t, err)
 
 	require.True(t, ok)
 	require.NotNil(t, output)
-	assert.Equal(t, 2, *output)
+	assert.Equal(t, 2, output)
 }
 
 func TestFind_ReturnsFalseIfNothingMatches(t *testing.T) {
 	values := []int{1, 2, 3, 4, 5}
 
-	output, ok, err := New(values).Find(func(v *int) bool { return *v > 10 })
+	output, ok, err := New(values).Find(func(v int) bool { return v > 10 })
 	require.NoError(t, err)
 
 	assert.False(t, ok)
@@ -357,7 +351,7 @@ func TestFind_PropagatesError(t *testing.T) {
 func TestPosition_ReturnsThePositionOfTheFirstElementThatMatches(t *testing.T) {
 	values := []int{1, 2, 3, 4, 5}
 
-	output, ok, err := New(values).Position(func(v *int) bool { return *v >= 4 })
+	output, ok, err := New(values).Position(func(v int) bool { return v >= 4 })
 	require.NoError(t, err)
 
 	require.True(t, ok)
@@ -368,7 +362,7 @@ func TestPosition_ReturnsThePositionOfTheFirstElementThatMatches(t *testing.T) {
 func TestPosition_ReturnsFalseIfNothingMatches(t *testing.T) {
 	values := []int{1, 2, 3, 4, 5}
 
-	output, ok, err := New(values).Position(func(v *int) bool { return *v > 10 })
+	output, ok, err := New(values).Position(func(v int) bool { return v > 10 })
 	require.NoError(t, err)
 
 	assert.False(t, ok)
@@ -401,7 +395,7 @@ func TestFold_AppliesTheFolderFunctionOnAllValues(t *testing.T) {
 
 	iter := New2[int, int](values)
 
-	res1, err := iter.Fold(0, func(cur int, v *int) int { return cur + *v })
+	res1, err := iter.Fold(0, func(cur int, v int) int { return cur + v })
 	require.NoError(t, err)
 
 	assert.Equal(t, 15, res1)
@@ -409,7 +403,7 @@ func TestFold_AppliesTheFolderFunctionOnAllValues(t *testing.T) {
 	iter2 := New2[int, string](values)
 	res2, err := iter2.Fold(
 		"result: ",
-		func(cur string, v *int) string { return cur + strconv.Itoa(*v) },
+		func(cur string, v int) string { return cur + strconv.Itoa(v) },
 	)
 	require.NoError(t, err)
 
@@ -438,17 +432,14 @@ func TestFold_PropagatesError(t *testing.T) {
 }
 
 func TestCopied_CopiesTheIterInASlice(t *testing.T) {
-	values := []int{1, 2, 3, 4, 5}
+	values := []*int{ptr(1), ptr(2), ptr(3), ptr(4), ptr(5)}
 	output, err := Copied(New(values))
 	require.NoError(t, err)
 
 	assert.Len(t, output, len(values))
 
 	for i, v := range output {
-		assert.Equal(t, values[i], v)
-
-		// They should not point to the same value
-		assert.NotSame(t, &values[i], &v)
+		assert.Equal(t, *values[i], v)
 	}
 }
 
@@ -456,7 +447,7 @@ func TestForEach_AppliesTheFunctionToAllElements(t *testing.T) {
 	type S struct {
 		i int
 	}
-	values := []S{{i: 1}, {i: 2}, {i: 3}, {i: 4}, {i: 5}}
+	values := []*S{{i: 1}, {i: 2}, {i: 3}, {i: 4}, {i: 5}}
 	err := New(values).ForEach(func(s *S) {
 		s.i *= 2
 	})
