@@ -36,7 +36,7 @@ func OptionOf[T any](val T) *Option[T] {
 // MapOption maps an Option<T> to Option<U> by applying a function to a contained value (if Some) or returns None
 // (if None).
 //
-// Deprecated: Use Option[T].Map()
+// Deprecated: Use Option[T].Map().
 func MapOption[T any, U any](opt *Option[T], f func(T) U) *Option[U] {
 	if opt.IsNone() {
 		return None[U]()
@@ -47,7 +47,7 @@ func MapOption[T any, U any](opt *Option[T], f func(T) U) *Option[U] {
 
 // MapOptionOr returns the provided default result (if None), or applies a function to the contained value (if Some).
 //
-// Deprecated: Use Option[T].MapOr()
+// Deprecated: Use Option[T].MapOr().
 func MapOptionOr[T any, U any](opt *Option[T], def U, f func(T) U) U {
 	if opt.IsNone() {
 		return def
@@ -59,7 +59,7 @@ func MapOptionOr[T any, U any](opt *Option[T], def U, f func(T) U) U {
 // MapOptionOrElse computes a default function result (if None), or applies a different function to the contained value
 // (if Some).
 //
-// Deprecated: Use Option[T].MapOrElse()
+// Deprecated: Use Option[T].MapOrElse().
 func MapOptionOrElse[T any, U any](opt *Option[T], factory func() U, f func(T) U) U {
 	if opt.IsNone() {
 		return factory()
@@ -70,7 +70,7 @@ func MapOptionOrElse[T any, U any](opt *Option[T], factory func() U, f func(T) U
 
 // And returns None if the Option is None, otherwise returns `optb`.
 //
-// Deprecated: Use Option[T].And()
+// Deprecated: Use Option[T].And().
 func And[T any, U any](opt *Option[T], other *Option[U]) *Option[U] {
 	if opt.IsNone() {
 		return None[U]()
@@ -81,7 +81,7 @@ func And[T any, U any](opt *Option[T], other *Option[U]) *Option[U] {
 
 // AndThen returns None if the Option is None, otherwise calls `f` with the wrapped value and returns the result.
 //
-// Deprecated: Use Option[T].AndThen()
+// Deprecated: Use Option[T].AndThen().
 func AndThen[T any, U any](opt *Option[T], f func(T) *Option[U]) *Option[U] {
 	if opt.IsNone() {
 		return None[U]()
