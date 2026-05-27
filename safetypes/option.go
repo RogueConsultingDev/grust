@@ -124,8 +124,7 @@ func (o *Option[T]) IsSomeAnd(f func(T) bool) bool {
 	return f(o.val)
 }
 
-// Expect returns the contained Some value, consuming the self value. Panics if the value is a None with a custom
-// panic message provided by msg.
+// Expect returns the contained Some value. Panics if the value is a None with a custom panic message provided by msg.
 func (o *Option[T]) Expect(msg string) T {
 	if o.ok {
 		return o.val
@@ -134,7 +133,7 @@ func (o *Option[T]) Expect(msg string) T {
 	panic(errors.New(msg))
 }
 
-// Unwrap returns the contained Some value, consuming the self value. Panics if the self value equals None.
+// Unwrap returns the contained Some value. Panics if the value equals None.
 func (o *Option[T]) Unwrap() T {
 	if o.ok {
 		return o.val
@@ -200,8 +199,8 @@ func (o *Option[T]) Inspect(f func(T)) *Option[T] {
 }
 
 // Filter returns None if the Option is None, otherwise calls predicate with the wrapped value and returns:
-//   - Some(t) if predicate returns true (where t is the wrapped value), and
-//   - None if predicate returns false.
+//   - Some(t) if the predicate returns true (where t is the wrapped value), and
+//   - None if the predicate returns false.
 func (o *Option[T]) Filter(f func(T) bool) *Option[T] {
 	if o.ok && f(o.val) {
 		return o
@@ -253,7 +252,7 @@ func (o *Option[T]) Insert(val T) *T {
 	return &o.val
 }
 
-// GetOrInsert inserts value into the Option if it is None, then returns a pointer to the contained value.
+// GetOrInsert inserts the value into the Option if it is None, then returns a pointer to the contained value.
 //
 // See also Insert, which updates the value even if the Option already contains Some.
 func (o *Option[T]) GetOrInsert(val T) *T {
