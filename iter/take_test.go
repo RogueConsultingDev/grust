@@ -1,3 +1,5 @@
+//go:build go1.27
+
 package it
 
 import (
@@ -34,7 +36,7 @@ func TestTake_StopsIfUnderlyingIteratorHasNoMoreElements(t *testing.T) {
 }
 
 func TestTake_StopsAfterN(t *testing.T) {
-	iter := &Iterator[int, any]{
+	iter := &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			if !yield(1, nil) {
 				return
@@ -49,7 +51,7 @@ func TestTake_StopsAfterN(t *testing.T) {
 }
 
 func TestTake_PropagatesError(t *testing.T) {
-	iter := &Iterator[int, any]{
+	iter := &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			if !yield(1, nil) {
 				return

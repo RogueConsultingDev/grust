@@ -1,3 +1,4 @@
+//go:build go1.27
 package it
 
 import (
@@ -6,12 +7,12 @@ import (
 )
 
 // Iter returns the raw iterator.
-func (i *Iterator[T, U]) Iter() iter.Seq2[T, error] {
+func (i *Iterator[T]) Iter() iter.Seq2[T, error] {
 	return i.it
 }
 
 // Collect collects all elements from the iterator into a slice.
-func (i *Iterator[T, U]) Collect() ([]T, error) {
+func (i *Iterator[T]) Collect() ([]T, error) {
 	output := make([]T, 0)
 
 	for v, err := range i.it {
@@ -26,7 +27,7 @@ func (i *Iterator[T, U]) Collect() ([]T, error) {
 }
 
 // Reversed collects all elements from the iterator into a slice in reverse order.
-func (i *Iterator[T, U]) Reversed() ([]T, error) {
+func (i *Iterator[T]) Reversed() ([]T, error) {
 	output := make([]T, 0)
 
 	for v, err := range i.it {
@@ -41,7 +42,7 @@ func (i *Iterator[T, U]) Reversed() ([]T, error) {
 }
 
 // Any checks if any element in the iterator satisfies the given predicate.
-func (i *Iterator[T, U]) Any(predicate func(T) bool) (bool, error) {
+func (i *Iterator[T]) Any(predicate func(T) bool) (bool, error) {
 	for v, err := range i.it {
 		if err != nil {
 			return false, err
@@ -56,7 +57,7 @@ func (i *Iterator[T, U]) Any(predicate func(T) bool) (bool, error) {
 }
 
 // All checks if all elements in the iterator satisfy the given predicate.
-func (i *Iterator[T, U]) All(predicate func(T) bool) (bool, error) {
+func (i *Iterator[T]) All(predicate func(T) bool) (bool, error) {
 	for v, err := range i.it {
 		if err != nil {
 			return false, err
@@ -71,7 +72,7 @@ func (i *Iterator[T, U]) All(predicate func(T) bool) (bool, error) {
 }
 
 // First returns the first element of the iterator, or an error if the iterator is empty.
-func (i *Iterator[T, U]) First() (T, error) {
+func (i *Iterator[T]) First() (T, error) {
 	for v, err := range i.it {
 		if err != nil {
 			var t T
@@ -88,7 +89,7 @@ func (i *Iterator[T, U]) First() (T, error) {
 }
 
 // Last returns the last element of the iterator, or an error if the iterator is empty.
-func (i *Iterator[T, U]) Last() (T, error) {
+func (i *Iterator[T]) Last() (T, error) {
 	var t T
 	found := false
 
@@ -110,7 +111,7 @@ func (i *Iterator[T, U]) Last() (T, error) {
 }
 
 // Find returns the first element of the iterator that satisfies the given predicate, if any.
-func (i *Iterator[T, U]) Find(predicate func(T) bool) (T, bool, error) {
+func (i *Iterator[T]) Find(predicate func(T) bool) (T, bool, error) {
 	for v, err := range i.it {
 		if err != nil {
 			var t T
@@ -129,7 +130,7 @@ func (i *Iterator[T, U]) Find(predicate func(T) bool) (T, bool, error) {
 }
 
 // Position returns the index of the element of the iterator that satisfies the given predicate, if any.
-func (i *Iterator[T, U]) Position(predicate func(T) bool) (int, bool, error) {
+func (i *Iterator[T]) Position(predicate func(T) bool) (int, bool, error) {
 	idx := 0
 
 	for v, err := range i.it {
@@ -148,7 +149,7 @@ func (i *Iterator[T, U]) Position(predicate func(T) bool) (int, bool, error) {
 }
 
 // ForEach calls the given function for each element in the iterator.
-func (i *Iterator[T, U]) ForEach(f func(T)) error {
+func (i *Iterator[T]) ForEach(f func(T)) error {
 	for v, err := range i.it {
 		if err != nil {
 			return err
@@ -162,7 +163,7 @@ func (i *Iterator[T, U]) ForEach(f func(T)) error {
 
 // Fold applies a function against an accumulator and each element in the iterator, from left to right, to reduce it to
 // a single value.
-func (i *Iterator[T, U]) Fold(init U, adder func(cur U, item T) U) (U, error) {
+func (i *Iterator[T]) Fold[U any](init U, adder func(cur U, item T) U) (U, error) {
 	current := init
 
 	for v, err := range i.it {
@@ -177,7 +178,7 @@ func (i *Iterator[T, U]) Fold(init U, adder func(cur U, item T) U) (U, error) {
 }
 
 // Copied dereferences all elements from the iterator into a slice.
-func Copied[T any, U any](i *Iterator[*T, U]) ([]T, error) {
+func Copied[T any](i *Iterator[*T]) ([]T, error) {
 	output := make([]T, 0)
 
 	for v, err := range i.it {

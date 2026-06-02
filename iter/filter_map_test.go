@@ -1,3 +1,5 @@
+//go:build go1.27
+
 package it
 
 import (
@@ -11,7 +13,7 @@ import (
 
 func TestFilterMap_MapsAndFiltersElements(t *testing.T) {
 	values := []int{1, 2, 3, 4, 5}
-	iter := New2[int, string](values)
+	iter := New[int](values)
 
 	filterMap := func(i int) (string, bool, error) {
 		if i%2 != 0 {
@@ -30,7 +32,7 @@ func TestFilterMap_MapsAndFiltersElements(t *testing.T) {
 
 func TestFilterMap_IsLazy(t *testing.T) {
 	values := []int{1, 2, 3}
-	iter := New2[int, int](values)
+	iter := New[int](values)
 
 	filterMap := func(i int) (int, bool, error) {
 		assert.LessOrEqualf(t, i, 2, "filter was called with unexpected value: %d", i)
@@ -47,7 +49,7 @@ func TestFilterMap_IsLazy(t *testing.T) {
 
 func TestFilterMap_StopsOnError(t *testing.T) {
 	values := []int{1, 2, 3}
-	iter := New2[int, int](values)
+	iter := New[int](values)
 
 	filterMap := func(i int) (int, bool, error) {
 		assert.LessOrEqualf(t, i, 2, "filter was called with unexpected value: %d", i)
@@ -65,7 +67,7 @@ func TestFilterMap_StopsOnError(t *testing.T) {
 }
 
 func TestFilterMap_PropagatesError(t *testing.T) {
-	iter := &Iterator[int, int]{
+	iter := &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			if !yield(1, nil) {
 				return

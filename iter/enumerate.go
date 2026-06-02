@@ -1,3 +1,5 @@
+//go:build go1.27
+
 package it
 
 type Enumerator[T any] struct {
@@ -5,7 +7,7 @@ type Enumerator[T any] struct {
 	Value T
 }
 
-func NewEnumeratorFrom[T any, U any](iter *Iterator[T, U]) *Iterator[Enumerator[T], U] {
+func NewEnumeratorFrom[T any](iter *Iterator[T]) *Iterator[Enumerator[T]] {
 	it := func(yield func(Enumerator[T], error) bool) {
 		idx := 0
 		for v, err := range iter.it {
@@ -19,5 +21,5 @@ func NewEnumeratorFrom[T any, U any](iter *Iterator[T, U]) *Iterator[Enumerator[
 		}
 	}
 
-	return &Iterator[Enumerator[T], U]{it}
+	return &Iterator[Enumerator[T]]{it}
 }

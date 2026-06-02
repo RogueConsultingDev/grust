@@ -1,3 +1,5 @@
+//go:build go1.27
+
 package it
 
 import (
@@ -11,7 +13,7 @@ import (
 
 func TestMap_TransformsElements(t *testing.T) {
 	values := []int{1, 2, 3}
-	iter := New2[int, string](values)
+	iter := New[int](values)
 
 	mapper := func(i int) (string, error) {
 		return strconv.Itoa(i * i), nil
@@ -26,7 +28,7 @@ func TestMap_TransformsElements(t *testing.T) {
 
 func TestMap_IsLazy(t *testing.T) {
 	values := []int{1, 2, 3}
-	iter := New2[int, int](values)
+	iter := New[int](values)
 
 	mapper := func(i int) (int, error) {
 		assert.LessOrEqualf(t, i, 2, "Mapper was called with unexpected value: %d", i)
@@ -43,7 +45,7 @@ func TestMap_IsLazy(t *testing.T) {
 
 func TestMap_StopsOnError(t *testing.T) {
 	values := []int{1, 2, 3}
-	iter := New2[int, int](values)
+	iter := New[int](values)
 
 	mapper := func(i int) (int, error) {
 		// We will error on value 2, so mapper should never be called with value 3
@@ -62,7 +64,7 @@ func TestMap_StopsOnError(t *testing.T) {
 }
 
 func TestMap_PropagatesError(t *testing.T) {
-	iter := &Iterator[int, int]{
+	iter := &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			if !yield(1, nil) {
 				return

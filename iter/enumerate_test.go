@@ -1,3 +1,5 @@
+//go:build go1.27
+
 package it
 
 import (
@@ -25,7 +27,7 @@ func TestEnumerate_ReturnsValuesAndTheirIndex(t *testing.T) {
 
 func TestEnumerate_StopsOnError(t *testing.T) {
 	values := []int{1, 2, 3}
-	iter := New2[int, int](values)
+	iter := New[int](values)
 
 	mapper := func(i int) (int, error) {
 		// We will error on value 2, so mapper should never be called with value 3

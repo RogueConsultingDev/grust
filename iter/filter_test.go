@@ -1,3 +1,5 @@
+//go:build go1.27
+
 package it
 
 import (
@@ -41,7 +43,7 @@ func TestFilter_IsLazy(t *testing.T) {
 }
 
 func TestFilter_PropagatesError(t *testing.T) {
-	iter := &Iterator[int, any]{
+	iter := &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			if !yield(1, nil) {
 				return

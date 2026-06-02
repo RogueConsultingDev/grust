@@ -1,6 +1,7 @@
+//go:build go1.27
 package it
 
-func (i *Iterator[T, U]) Map(f func(T) (U, error)) *Iterator[U, any] {
+func (i *Iterator[T]) Map[U any](f func(T) (U, error)) *Iterator[U] {
 	it := func(yield func(U, error) bool) {
 		for v, err := range i.it {
 			if err != nil {
@@ -17,5 +18,5 @@ func (i *Iterator[T, U]) Map(f func(T) (U, error)) *Iterator[U, any] {
 		}
 	}
 
-	return &Iterator[U, any]{it}
+	return &Iterator[U]{it}
 }

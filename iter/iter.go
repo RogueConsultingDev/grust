@@ -1,3 +1,5 @@
+//go:build go1.27
+
 // Package it implements Rust-style Iterators
 package it
 
@@ -6,7 +8,7 @@ import (
 	"iter"
 )
 
-type Iterator[T any, U any] struct {
+type Iterator[T any] struct {
 	it iter.Seq2[T, error]
 }
 
@@ -16,8 +18,8 @@ type Tuple[T any, U any] struct {
 }
 
 // New creates an iterator from the given slice.
-func New[T any](values []T) *Iterator[T, any] {
-	return &Iterator[T, any]{
+func New[T any](values []T) *Iterator[T] {
+	return &Iterator[T]{
 		it: func(yield func(T, error) bool) {
 			for i := range values {
 				if !yield(values[i], nil) {
@@ -29,40 +31,8 @@ func New[T any](values []T) *Iterator[T, any] {
 }
 
 // NewP creates an iterator to pointers of values from the given slice.
-func NewP[T any](values []T) *Iterator[*T, any] {
-	return &Iterator[*T, any]{
-		it: func(yield func(*T, error) bool) {
-			for i := range values {
-				if !yield(&values[i], nil) {
-					return
-				}
-			}
-		},
-	}
-}
-
-// New2 creates an iterator from the given slice, with a different secondary type.
-// This is useful for creating a mapping iterator.
-
-// Deprecated: Un-necessary since generic methods.
-func New2[T any, U any](values []T) *Iterator[T, U] {
-	return &Iterator[T, U]{
-		it: func(yield func(T, error) bool) {
-			for i := range values {
-				if !yield(values[i], nil) {
-					return
-				}
-			}
-		},
-	}
-}
-
-// NewP2 creates an iterator to pointers of values from the given slice, with a different secondary type.
-// This is useful for creating a mapping iterator.
-
-// Deprecated: Un-necessary since generic methods.
-func NewP2[T any, U any](values []T) *Iterator[*T, U] {
-	return &Iterator[*T, U]{
+func NewP[T any](values []T) *Iterator[*T] {
+	return &Iterator[*T]{
 		it: func(yield func(*T, error) bool) {
 			for i := range values {
 				if !yield(&values[i], nil) {
@@ -74,8 +44,8 @@ func NewP2[T any, U any](values []T) *Iterator[*T, U] {
 }
 
 // Reversed creates an iterator from the given slice in reverse order.
-func Reversed[T any](values []T) *Iterator[T, any] {
-	return &Iterator[T, any]{
+func Reversed[T any](values []T) *Iterator[T] {
+	return &Iterator[T]{
 		it: func(yield func(T, error) bool) {
 			n := len(values) - 1
 			for i := range values {
@@ -87,25 +57,9 @@ func Reversed[T any](values []T) *Iterator[T, any] {
 	}
 }
 
-// From creates an iterator from the given iterator, with a different secondary type.
-// This is useful for creating a mapping iterator.
-
-// Deprecated: Un-necessary since generic methods.
-func From[T any, U any](source *Iterator[T, any]) *Iterator[T, U] {
-	return &Iterator[T, U]{
-		it: func(yield func(T, error) bool) {
-			for i, err := range source.it {
-				if !yield(i, err) {
-					return
-				}
-			}
-		},
-	}
-}
-
 // Repeat creates an iterator than endlessly repeats a unique element.
-func Repeat[T any](v T) *Iterator[T, any] {
-	return &Iterator[T, any]{
+func Repeat[T any](v T) *Iterator[T] {
+	return &Iterator[T]{
 		it: func(yield func(T, error) bool) {
 			for {
 				if !yield(v, nil) {
@@ -117,8 +71,8 @@ func Repeat[T any](v T) *Iterator[T, any] {
 }
 
 // RepeatN creates an iterator than repeats a unique element a given number of times.
-func RepeatN[T any](v T, n int) *Iterator[T, any] {
-	return &Iterator[T, any]{
+func RepeatN[T any](v T, n int) *Iterator[T] {
+	return &Iterator[T]{
 		it: func(yield func(T, error) bool) {
 			for range n {
 				if !yield(v, nil) {
@@ -130,8 +84,8 @@ func RepeatN[T any](v T, n int) *Iterator[T, any] {
 }
 
 // Incr creates an iterator that returns numbers, starting at 0 and endlessly incrementing by 1.
-func Incr() *Iterator[int, any] {
-	return &Iterator[int, any]{
+func Incr() *Iterator[int] {
+	return &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			for i := 0; ; i++ {
 				if !yield(i, nil) {
@@ -143,8 +97,8 @@ func Incr() *Iterator[int, any] {
 }
 
 // IncrN creates an iterator that returns numbers, starting at 0 and endlessly incrementing by `n`.
-func IncrN(n int) *Iterator[int, any] {
-	return &Iterator[int, any]{
+func IncrN(n int) *Iterator[int] {
+	return &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			for i := 0; ; i += n {
 				if !yield(i, nil) {
@@ -156,8 +110,8 @@ func IncrN(n int) *Iterator[int, any] {
 }
 
 // IncrFrom creates an iterator that returns numbers, starting at `start` and endlessly incrementing by 1.
-func IncrFrom(start int) *Iterator[int, any] {
-	return &Iterator[int, any]{
+func IncrFrom(start int) *Iterator[int] {
+	return &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			for i := start; ; i++ {
 				if !yield(i, nil) {
@@ -169,8 +123,8 @@ func IncrFrom(start int) *Iterator[int, any] {
 }
 
 // IncrNFrom creates an iterator that returns numbers, starting at `start` and endlessly incrementing by `n`.
-func IncrNFrom(start int, n int) *Iterator[int, any] {
-	return &Iterator[int, any]{
+func IncrNFrom(start int, n int) *Iterator[int] {
+	return &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			for i := start; ; i += n {
 				if !yield(i, nil) {
@@ -183,8 +137,8 @@ func IncrNFrom(start int, n int) *Iterator[int, any] {
 
 // Range creates an iterator that returns numbers, starting at `start` (inclusive) and incrementing by 1 until `end`
 // (exclusive).
-func Range(start int, end int) *Iterator[int, any] {
-	return &Iterator[int, any]{
+func Range(start int, end int) *Iterator[int] {
+	return &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			for i := start; i < end; i++ {
 				if !yield(i, nil) {
@@ -196,8 +150,8 @@ func Range(start int, end int) *Iterator[int, any] {
 }
 
 // Cycle creates an iterator that endlessly cycles through the given values.
-func Cycle[T any](values []T) *Iterator[T, any] {
-	return &Iterator[T, any]{
+func Cycle[T any](values []T) *Iterator[T] {
+	return &Iterator[T]{
 		it: func(yield func(T, error) bool) {
 			for {
 				for i := range values {
@@ -211,8 +165,8 @@ func Cycle[T any](values []T) *Iterator[T, any] {
 }
 
 // Chain creates an iterator that yields all elements from the given slices.
-func Chain[T any](slices ...[]T) *Iterator[T, any] {
-	return &Iterator[T, any]{
+func Chain[T any](slices ...[]T) *Iterator[T] {
+	return &Iterator[T]{
 		it: func(yield func(T, error) bool) {
 			for _, s := range slices {
 				for i := range s {
@@ -226,8 +180,8 @@ func Chain[T any](slices ...[]T) *Iterator[T, any] {
 }
 
 // Product creates an iterator that yields all possible pairs of elements from the given slices.
-func Product[T any, U any](p []T, q []U) *Iterator[Tuple[T, U], any] {
-	return &Iterator[Tuple[T, U], any]{
+func Product[T any, U any](p []T, q []U) *Iterator[Tuple[T, U]] {
+	return &Iterator[Tuple[T, U]]{
 		it: func(yield func(Tuple[T, U], error) bool) {
 			for i := range p {
 				for j := range q {
@@ -242,8 +196,8 @@ func Product[T any, U any](p []T, q []U) *Iterator[Tuple[T, U], any] {
 }
 
 // Zip creates an iterator that yields elements of both slices, one by one, until either slice is exhausted.
-func Zip[T any, U any](a []T, b []U) *Iterator[Tuple[T, U], any] {
-	return &Iterator[Tuple[T, U], any]{
+func Zip[T any, U any](a []T, b []U) *Iterator[Tuple[T, U]] {
+	return &Iterator[Tuple[T, U]]{
 		it: func(yield func(Tuple[T, U], error) bool) {
 			for idx := range a {
 				if idx >= len(b) {
@@ -262,8 +216,8 @@ func Zip[T any, U any](a []T, b []U) *Iterator[Tuple[T, U], any] {
 
 // ZipEq creates an iterator that yields elements of both slices, one by one, as long as both slices are the same
 // length.
-func ZipEq[T any, U any](a []T, b []U) *Iterator[Tuple[T, U], any] {
-	return &Iterator[Tuple[T, U], any]{
+func ZipEq[T any, U any](a []T, b []U) *Iterator[Tuple[T, U]] {
+	return &Iterator[Tuple[T, U]]{
 		it: func(yield func(Tuple[T, U], error) bool) {
 			if len(a) != len(b) {
 				var t Tuple[T, U]

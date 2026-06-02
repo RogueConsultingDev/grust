@@ -1,7 +1,9 @@
+//go:build go1.27
+
 package it
 
 // Take creates an iterator that yields at most N elements.
-func (i *Iterator[T, U]) Take(n int) *Iterator[T, U] {
+func (i *Iterator[T]) Take(n int) *Iterator[T] {
 	inner := func(yield func(T, error) bool) {
 		for v, err := range i.it {
 			if err != nil {
@@ -22,5 +24,5 @@ func (i *Iterator[T, U]) Take(n int) *Iterator[T, U] {
 		}
 	}
 
-	return &Iterator[T, U]{inner}
+	return &Iterator[T]{inner}
 }

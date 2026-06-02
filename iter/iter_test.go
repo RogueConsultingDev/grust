@@ -1,3 +1,5 @@
+//go:build go1.27
+
 package it
 
 import (
@@ -58,7 +60,7 @@ func TestNewP_DoesntAllocate(t *testing.T) {
 
 func TestNew2_ReturnsAnIteratorOverTheValuesWithADifferent2ndType(t *testing.T) {
 	values := []int{1, 2, 3, 4, 5}
-	iter := New2[int, string](values)
+	iter := New[int](values)
 
 	idx := 0
 	for v := range iter.it {
@@ -73,7 +75,7 @@ func TestNew2_ReturnsAnIteratorOverTheValuesWithADifferent2ndType(t *testing.T) 
 
 func TestNewP2_ReturnsAnIteratorOverPointersToTheValues(t *testing.T) {
 	values := []int{1, 2, 3, 4, 5}
-	iter := NewP2[int, string](values)
+	iter := NewP[int](values)
 
 	idx := 0
 	for v := range iter.it {
@@ -88,7 +90,7 @@ func TestNewP2_ReturnsAnIteratorOverPointersToTheValues(t *testing.T) {
 
 func TestNewP2_DoesntAllocate(t *testing.T) {
 	values := []int{1, 2, 3, 4, 5}
-	iter := NewP2[int, string](values)
+	iter := NewP[int](values)
 
 	idx := 0
 	for v := range iter.it {
@@ -110,11 +112,11 @@ func TestReversed_ReturnsAnIteratorOverTheValuesInReverseOrder(t *testing.T) {
 
 func TestFrom_ReturnsANewIteratorWithADifferent2ndType(t *testing.T) {
 	values := []int{1, 2, 3, 4, 5}
-	iter := New2[int, string](values).Map(func(i int) (string, error) {
+	iter := New[int](values).Map(func(i int) (string, error) {
 		return strconv.Itoa(i), nil
 	})
 
-	iter2 := From[string, int](iter).Map(strconv.Atoi)
+	iter2 := iter.Map(strconv.Atoi)
 
 	idx := 0
 	for v := range iter2.it {

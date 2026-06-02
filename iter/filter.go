@@ -1,6 +1,8 @@
+//go:build go1.27
+
 package it
 
-func (i *Iterator[T, U]) Filter(predicate func(T) bool) *Iterator[T, U] {
+func (i *Iterator[T]) Filter(predicate func(T) bool) *Iterator[T] {
 	inner := func(yield func(T, error) bool) {
 		for v, err := range i.it {
 			if err != nil {
@@ -15,5 +17,5 @@ func (i *Iterator[T, U]) Filter(predicate func(T) bool) *Iterator[T, U] {
 		}
 	}
 
-	return &Iterator[T, U]{inner}
+	return &Iterator[T]{inner}
 }

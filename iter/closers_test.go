@@ -1,3 +1,5 @@
+//go:build go1.27
+
 package it
 
 import (
@@ -10,7 +12,7 @@ import (
 )
 
 func TestIter_ReturnsTheRawIterator(t *testing.T) {
-	iter := &Iterator[int, any]{
+	iter := &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			if !yield(1, nil) {
 				return
@@ -51,7 +53,7 @@ func TestCollect_CollectsTheIterInASlice(t *testing.T) {
 }
 
 func TestCollect_PropagatesError(t *testing.T) {
-	iter := &Iterator[int, any]{
+	iter := &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			if !yield(1, nil) {
 				return
@@ -88,7 +90,7 @@ func TestReversed_CollectsTheIterInASliceInReverseOrder(t *testing.T) {
 }
 
 func TestReversed_PropagatesError(t *testing.T) {
-	iter := &Iterator[int, any]{
+	iter := &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			if !yield(1, nil) {
 				return
@@ -143,7 +145,7 @@ func TestAny_ReturnsFalseIfNoElementsMatchThePredicate(t *testing.T) {
 }
 
 func TestAny_StopsAtTheFirstMatchingElement(t *testing.T) {
-	iter := &Iterator[int, any]{
+	iter := &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			if !yield(1, nil) {
 				return
@@ -163,7 +165,7 @@ func TestAny_StopsAtTheFirstMatchingElement(t *testing.T) {
 }
 
 func TestAny_PropagatesError(t *testing.T) {
-	iter := &Iterator[int, any]{
+	iter := &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			if !yield(42, errors.New("some error")) {
 				return
@@ -204,7 +206,7 @@ func TestAll_ReturnsFalseIfAnyElementDoesntMatchThePredicate(t *testing.T) {
 }
 
 func TestAll_StopsAtTheFirstNonMatchingElement(t *testing.T) {
-	iter := &Iterator[int, any]{
+	iter := &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			if !yield(1, nil) {
 				return
@@ -224,7 +226,7 @@ func TestAll_StopsAtTheFirstNonMatchingElement(t *testing.T) {
 }
 
 func TestAll_PropagatesError(t *testing.T) {
-	iter := &Iterator[int, any]{
+	iter := &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			if !yield(42, errors.New("some error")) {
 				return
@@ -242,7 +244,7 @@ func TestAll_PropagatesError(t *testing.T) {
 func TestFirst_ReturnsTheFirstElementOfTheIter(t *testing.T) {
 	val := 42
 
-	iter := &Iterator[int, any]{
+	iter := &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			if !yield(val, nil) {
 				return
@@ -263,7 +265,7 @@ func TestFirst_ReturnsAnErrorIfIteratorIsEmpty(t *testing.T) {
 }
 
 func TestFirst_PropagatesError(t *testing.T) {
-	iter := &Iterator[int, any]{
+	iter := &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			if !yield(42, errors.New("some error")) {
 				return
@@ -291,7 +293,7 @@ func TestLast_ReturnsAnErrorIfIteratorIsEmpty(t *testing.T) {
 }
 
 func TestLast_PropagatesError(t *testing.T) {
-	iter := &Iterator[int, any]{
+	iter := &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			if !yield(42, errors.New("some error")) {
 				return
@@ -328,7 +330,7 @@ func TestFind_ReturnsFalseIfNothingMatches(t *testing.T) {
 }
 
 func TestFind_PropagatesError(t *testing.T) {
-	iter := &Iterator[int, int]{
+	iter := &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			if !yield(1, nil) {
 				return
@@ -370,7 +372,7 @@ func TestPosition_ReturnsFalseIfNothingMatches(t *testing.T) {
 }
 
 func TestPosition_PropagatesError(t *testing.T) {
-	iter := &Iterator[int, int]{
+	iter := &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			if !yield(1, nil) {
 				return
@@ -393,14 +395,14 @@ func TestPosition_PropagatesError(t *testing.T) {
 func TestFold_AppliesTheFolderFunctionOnAllValues(t *testing.T) {
 	values := []int{1, 2, 3, 4, 5}
 
-	iter := New2[int, int](values)
+	iter := New[int](values)
 
 	res1, err := iter.Fold(0, func(cur int, v int) int { return cur + v })
 	require.NoError(t, err)
 
 	assert.Equal(t, 15, res1)
 
-	iter2 := New2[int, string](values)
+	iter2 := New[int](values)
 	res2, err := iter2.Fold(
 		"result: ",
 		func(cur string, v int) string { return cur + strconv.Itoa(v) },
@@ -411,7 +413,7 @@ func TestFold_AppliesTheFolderFunctionOnAllValues(t *testing.T) {
 }
 
 func TestFold_PropagatesError(t *testing.T) {
-	iter := &Iterator[int, int]{
+	iter := &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			if !yield(1, nil) {
 				return
@@ -459,7 +461,7 @@ func TestForEach_AppliesTheFunctionToAllElements(t *testing.T) {
 }
 
 func TestForEach_StopsOnError(t *testing.T) {
-	iter := &Iterator[int, any]{
+	iter := &Iterator[int]{
 		it: func(yield func(int, error) bool) {
 			if !yield(1, nil) {
 				return
@@ -492,7 +494,7 @@ func TestForEach_StopsOnError(t *testing.T) {
 }
 
 func TestCopied_PropagatesError(t *testing.T) {
-	iter := &Iterator[*int, any]{
+	iter := &Iterator[*int]{
 		it: func(yield func(*int, error) bool) {
 			if !yield(ptr(1), nil) {
 				return
