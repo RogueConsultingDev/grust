@@ -1,9 +1,10 @@
-//go:build !go1.27
+//go:build go1.27
 
 package it
 
 import (
 	"errors"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,15 +15,15 @@ func TestMap_TransformsElements(t *testing.T) {
 	values := []int{1, 2, 3}
 	iter := New[int](values)
 
-	mapper := func(i int) (int, error) {
-		return i * i, nil
+	mapper := func(i int) (string, error) {
+		return strconv.Itoa(i * i), nil
 	}
 
 	output, err := iter.Map(mapper).Collect()
 
 	require.NoError(t, err)
 
-	assert.Equal(t, []int{1, 4, 9}, output)
+	assert.Equal(t, []string{"1", "4", "9"}, output)
 }
 
 func TestMap_IsLazy(t *testing.T) {

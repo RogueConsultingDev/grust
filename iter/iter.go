@@ -1,5 +1,3 @@
-//go:build go1.27
-
 // Package it implements Rust-style Iterators
 package it
 

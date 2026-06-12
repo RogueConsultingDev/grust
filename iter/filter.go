@@ -1,5 +1,3 @@
-//go:build go1.27
-
 package it
 
 func (i *Iterator[T]) Filter(predicate func(T) bool) *Iterator[T] {

@@ -1,11 +1,8 @@
-//go:build go1.27
-
 package it
 
 import (
 	"fmt"
 	"math"
-	"strconv"
 	"testing"
 
 	"github.com/jaswdr/faker/v2"
@@ -26,10 +23,6 @@ func TestNew_ReturnsAnIteratorOverTheValues(t *testing.T) {
 		assert.Equal(t, values[idx], v)
 		idx += 1
 	}
-
-	// The 2nd type of the iterator should be `any`.
-	// This code compiling is the test.
-	iter.Map(func(int) (any, error) { return 0, nil })
 }
 
 func TestNewP_ReturnsAnIteratorOverPointersToTheValues(t *testing.T) {
@@ -41,10 +34,6 @@ func TestNewP_ReturnsAnIteratorOverPointersToTheValues(t *testing.T) {
 		assert.Equal(t, values[idx], *v)
 		idx += 1
 	}
-
-	// The 2nd type of the iterator should be `any`.
-	// This code compiling is the test.
-	iter.Map(func(*int) (any, error) { return 0, nil })
 }
 
 func TestNewP_DoesntAllocate(t *testing.T) {
@@ -67,10 +56,6 @@ func TestNew2_ReturnsAnIteratorOverTheValuesWithADifferent2ndType(t *testing.T) 
 		assert.Equal(t, values[idx], v)
 		idx += 1
 	}
-
-	// The 2nd type of the iterator should be the specified one.
-	// This code compiling is the test.
-	iter.Map(func(int) (string, error) { return "", nil })
 }
 
 func TestNewP2_ReturnsAnIteratorOverPointersToTheValues(t *testing.T) {
@@ -82,10 +67,6 @@ func TestNewP2_ReturnsAnIteratorOverPointersToTheValues(t *testing.T) {
 		assert.Equal(t, values[idx], *v)
 		idx += 1
 	}
-
-	// The 2nd type of the iterator should be the specified one.
-	// This code compiling is the test.
-	iter.Map(func(*int) (string, error) { return "", nil })
 }
 
 func TestNewP2_DoesntAllocate(t *testing.T) {
@@ -106,21 +87,6 @@ func TestReversed_ReturnsAnIteratorOverTheValuesInReverseOrder(t *testing.T) {
 	idx := 0
 	for v := range iter.it {
 		assert.Equal(t, values[4-idx], v)
-		idx += 1
-	}
-}
-
-func TestFrom_ReturnsANewIteratorWithADifferent2ndType(t *testing.T) {
-	values := []int{1, 2, 3, 4, 5}
-	iter := New[int](values).Map(func(i int) (string, error) {
-		return strconv.Itoa(i), nil
-	})
-
-	iter2 := iter.Map(strconv.Atoi)
-
-	idx := 0
-	for v := range iter2.it {
-		assert.Equal(t, values[idx], v)
 		idx += 1
 	}
 }

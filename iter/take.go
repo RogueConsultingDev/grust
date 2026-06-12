@@ -1,5 +1,3 @@
-//go:build go1.27
-
 package it
 
 // Take creates an iterator that yields at most N elements.
