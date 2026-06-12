@@ -1,9 +1,10 @@
-//go:build !go1.27
+//go:build go1.27
 
 package it
 
 import (
 	"errors"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,19 +15,19 @@ func TestFilterMap_MapsAndFiltersElements(t *testing.T) {
 	values := []int{1, 2, 3, 4, 5}
 	iter := New[int](values)
 
-	filterMap := func(i int) (int, bool, error) {
+	filterMap := func(i int) (string, bool, error) {
 		if i%2 != 0 {
-			return 0, false, nil
+			return "", false, nil
 		}
 
-		return i * i, true, nil
+		return strconv.Itoa(i * i), true, nil
 	}
 
 	output, err := iter.FilterMap(filterMap).Collect()
 
 	require.NoError(t, err)
 
-	assert.Equal(t, []int{4, 16}, output)
+	assert.Equal(t, []string{"4", "16"}, output)
 }
 
 func TestFilterMap_IsLazy(t *testing.T) {

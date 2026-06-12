@@ -1,12 +1,12 @@
-//go:build !go1.27
+//go:build go1.27
 
 package it
 
-func (i *Iterator[T]) FilterMap(f func(T) (T, bool, error)) *Iterator[T] {
-	inner := func(yield func(T, error) bool) {
+func (i *Iterator[T]) FilterMap[U any](f func(T) (U, bool, error)) *Iterator[U] {
+	inner := func(yield func(U, error) bool) {
 		for v, err := range i.it {
 			if err != nil {
-				var zero T
+				var zero U
 				yield(zero, err)
 
 				return
@@ -21,5 +21,5 @@ func (i *Iterator[T]) FilterMap(f func(T) (T, bool, error)) *Iterator[T] {
 		}
 	}
 
-	return &Iterator[T]{inner}
+	return &Iterator[U]{inner}
 }
