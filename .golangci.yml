@@ -4,7 +4,7 @@ linters:
   disable:
     - depguard
     - err113
-    - godox
+    - gomodguard
     - paralleltest
     - testpackage
     - varnamelen
