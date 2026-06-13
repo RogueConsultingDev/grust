@@ -141,7 +141,7 @@ func (i *Iterator[T]) Position(predicate func(T) bool) (int, bool, error) {
 			return idx, true, nil
 		}
 
-		idx += 1
+		idx++
 	}
 
 	return 0, false, nil

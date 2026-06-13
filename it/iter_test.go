@@ -21,7 +21,7 @@ func TestNew_ReturnsAnIteratorOverTheValues(t *testing.T) {
 	idx := 0
 	for v := range iter.it {
 		assert.Equal(t, values[idx], v)
-		idx += 1
+		idx++
 	}
 }
 
@@ -32,7 +32,7 @@ func TestNewP_ReturnsAnIteratorOverPointersToTheValues(t *testing.T) {
 	idx := 0
 	for v := range iter.it {
 		assert.Equal(t, values[idx], *v)
-		idx += 1
+		idx++
 	}
 }
 
@@ -43,7 +43,7 @@ func TestNewP_DoesntAllocate(t *testing.T) {
 	idx := 0
 	for v := range iter.it {
 		assert.Same(t, &values[idx], v, "%p != %p", &values[idx], v)
-		idx += 1
+		idx++
 	}
 }
 
@@ -54,7 +54,7 @@ func TestNew2_ReturnsAnIteratorOverTheValuesWithADifferent2ndType(t *testing.T) 
 	idx := 0
 	for v := range iter.it {
 		assert.Equal(t, values[idx], v)
-		idx += 1
+		idx++
 	}
 }
 
@@ -65,7 +65,7 @@ func TestNewP2_ReturnsAnIteratorOverPointersToTheValues(t *testing.T) {
 	idx := 0
 	for v := range iter.it {
 		assert.Equal(t, values[idx], *v)
-		idx += 1
+		idx++
 	}
 }
 
@@ -76,7 +76,7 @@ func TestNewP2_DoesntAllocate(t *testing.T) {
 	idx := 0
 	for v := range iter.it {
 		assert.Same(t, &values[idx], v, "%p != %p", &values[idx], v)
-		idx += 1
+		idx++
 	}
 }
 
@@ -87,7 +87,7 @@ func TestReversed_ReturnsAnIteratorOverTheValuesInReverseOrder(t *testing.T) {
 	idx := 0
 	for v := range iter.it {
 		assert.Equal(t, values[4-idx], v)
-		idx += 1
+		idx++
 	}
 }
 
@@ -101,7 +101,7 @@ func TestRepeat_ReturnsAnInfiniteIterator(t *testing.T) {
 	for v := range repeat.it {
 		require.Equal(t, val, v)
 
-		c += 1
+		c++
 
 		// Let's stop right there
 		if c == 1_000 {
@@ -121,7 +121,7 @@ func TestRepeatN_ReturnsAnInteratorOfNValues(t *testing.T) {
 	for v := range repeat.it {
 		require.Equal(t, val, v)
 
-		c += 1
+		c++
 
 		// Safety stop
 		if c == n+1 {
@@ -154,7 +154,7 @@ func TestIncr_ReturnsAnIteratorThatIncreasesInValue(t *testing.T) {
 	for i := range incr.it {
 		require.Equal(t, c, i)
 
-		c += 1
+		c++
 		if c == 1_000 {
 			break
 		}
@@ -170,7 +170,7 @@ func TestIncrN_ReturnsAnIteratorThatIncreasesByNInValue(t *testing.T) {
 	for i := range incr.it {
 		require.Equal(t, c*n, i)
 
-		c += 1
+		c++
 		if c == 1_000 {
 			break
 		}
@@ -186,7 +186,7 @@ func TestIncrFrom_ReturnsAnIteratorThatIncreasesInValueFromStart(t *testing.T) {
 			for i := range incr.it {
 				require.Equal(t, start+c, i)
 
-				c += 1
+				c++
 				if c == 1_000 {
 					break
 				}
@@ -206,7 +206,7 @@ func TestIncrNFrom_ReturnsAnIteratorThatIncreasesInValueFromStart(t *testing.T) 
 			for i := range incr.it {
 				require.Equal(t, start+c*n, i)
 
-				c += 1
+				c++
 				if c == 1_000 {
 					break
 				}
@@ -225,7 +225,7 @@ func TestRange_ReturnsAnIteratorThatIncreasesInValueFromStartToEnd(t *testing.T)
 	for i := range rangeIter.it {
 		require.Equal(t, start+c, i)
 
-		c += 1
+		c++
 
 		if i >= end {
 			require.Fail(
@@ -249,7 +249,7 @@ func TestCycle_IteratesOverTheSliceOverAndOverAgain(t *testing.T) {
 	for v := range Cycle(sl).it {
 		require.Equal(t, expected[idx], v)
 
-		idx += 1
+		idx++
 		if idx == len(expected) {
 			break
 		}
@@ -268,7 +268,7 @@ func TestChain_IteratesOverMultipleSlices(t *testing.T) {
 	for v := range Chain(sl1, sl2, sl3).it {
 		require.Equal(t, expected[idx], v)
 
-		idx += 1
+		idx++
 	}
 
 	// Make sure we covered all expected values
@@ -300,7 +300,7 @@ func TestProduct_ReturnsTheCartesianProductOfTwoIterables(t *testing.T) {
 		require.Equal(t, expected[idx].A, v.A)
 		require.Equal(t, expected[idx].B, v.B)
 
-		idx += 1
+		idx++
 	}
 
 	// Make sure we covered all expected values
@@ -316,7 +316,7 @@ func TestZip_ReturnsValuesFromTwoSlices(t *testing.T) {
 		assert.Equal(t, iterA[idx], v.A)
 		assert.Equal(t, iterB[idx], v.B)
 
-		idx += 1
+		idx++
 	}
 }
 
@@ -327,7 +327,7 @@ func TestZip_StopsAtTheShortestOfTwoSlices(t *testing.T) {
 	// Slice A is shorter
 	idx := 0
 	for range Zip(iterA[:3], iterB).it {
-		idx += 1
+		idx++
 	}
 
 	assert.Equal(t, 3, idx)
@@ -335,7 +335,7 @@ func TestZip_StopsAtTheShortestOfTwoSlices(t *testing.T) {
 	// Slice B is shorter
 	idx = 0
 	for range Zip(iterA, iterB[:3]).it {
-		idx += 1
+		idx++
 	}
 
 	assert.Equal(t, 3, idx)
@@ -350,7 +350,7 @@ func TestZipEq_ReturnsValuesFromTwoSlices(t *testing.T) {
 		assert.Equal(t, iterA[idx], v.A)
 		assert.Equal(t, iterB[idx], v.B)
 
-		idx += 1
+		idx++
 	}
 }
 

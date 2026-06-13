@@ -14,7 +14,7 @@ func (i *Iterator[T]) Take(n int) *Iterator[T] {
 				return
 			}
 
-			n -= 1
+			n--
 
 			if n == 0 {
 				return

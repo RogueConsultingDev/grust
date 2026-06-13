@@ -52,10 +52,10 @@ linters:
         path: safetypes/.*\.go
       - linters:  # Returning "any" is the whole point
           - ireturn
-        path: iter/.*\.go
+        path: it/.*\.go
       - linters:  # TODO: REMOVE ME
           - revive
-        path: iter/.*\.go
+        path: it/.*\.go
       - linters:
           - govet
         text: 'shadow: declaration of "(err|ctx)" shadows declaration at'

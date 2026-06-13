@@ -15,7 +15,7 @@ func NewEnumeratorFrom[T any](iter *Iterator[T]) *Iterator[Enumerator[T]] {
 				return
 			}
 
-			idx += 1
+			idx++
 		}
 	}
 
