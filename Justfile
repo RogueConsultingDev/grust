@@ -5,7 +5,9 @@ test:
     go tool gotestsum -- -coverprofile=.coverage ./...
 
 update:
-    go get -u -t toolchain@XXX ./...
+    #!/usr/bin/env bash
+    TOOLCHAIN="$(cat go.mod | grep '^go [0-9.]\+$' | cut -d ' ' -f2)"
+    go get -u -t "toolchain@${TOOLCHAIN}" ./...
 
 cov-render:
     go tool cover -html .coverage -o coverage.html

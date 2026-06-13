@@ -1,10 +1,10 @@
 module github.com/RogueConsultingDev/grust
 
-go 1.23.2
+go 1.24.0
 
 require (
-	github.com/jaswdr/faker/v2 v2.8.0
-	github.com/stretchr/testify v1.10.0
+	github.com/jaswdr/faker/v2 v2.9.1
+	github.com/stretchr/testify v1.11.1
 )
 
 require (
@@ -18,7 +18,6 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	golang.org/x/mod v0.16.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
