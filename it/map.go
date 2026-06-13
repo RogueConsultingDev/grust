@@ -2,6 +2,8 @@
 
 package it
 
+// Map applies a function to each element and yields the result.
+// Unlike its Go 1.27 counterpart, the return type of the mapping function must be the same as the one of the iterator.
 func (i *Iterator[T]) Map(f func(T) (T, error)) *Iterator[T] {
 	it := func(yield func(T, error) bool) {
 		for v, err := range i.it {

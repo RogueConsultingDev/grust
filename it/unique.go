@@ -6,6 +6,7 @@ import (
 	"slices"
 )
 
+// Equal is an interface for types that can be compared for equality.
 type Equal[T any] interface {
 	Equal(other T) bool
 }

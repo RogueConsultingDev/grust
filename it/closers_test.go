@@ -125,7 +125,7 @@ func TestAny_ReturnsTrueOnFirstElementThatMatchesThePredicate(t *testing.T) {
 	assert.True(t, output)
 
 	// A slice with only a nil pointer still has a value
-	output, err = New([]*int{nil}).Any(func(i *int) bool { return true })
+	output, err = New([]*int{nil}).Any(func(*int) bool { return true })
 	require.NoError(t, err)
 	assert.True(t, output)
 

@@ -6,10 +6,12 @@ import (
 	"iter"
 )
 
+// Iterator is a wrapper around a golang iter that offers multiple functions mirroring what Rust offers.
 type Iterator[T any] struct {
 	it iter.Seq2[T, error]
 }
 
+// Tuple is a type that represents a pair of values.
 type Tuple[T any, U any] struct {
 	A T
 	B U

@@ -1,5 +1,6 @@
 package it
 
+// Filter applies a predicate to each element and yields only the elements that satisfy it.
 func (i *Iterator[T]) Filter(predicate func(T) bool) *Iterator[T] {
 	inner := func(yield func(T, error) bool) {
 		for v, err := range i.it {

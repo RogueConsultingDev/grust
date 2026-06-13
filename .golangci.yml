@@ -44,6 +44,7 @@ linters:
           - errcheck
           - funlen
           - gochecknoglobals
+          - goconst
           - gocyclo
           - gosec
         path: _test\.go
@@ -52,9 +53,6 @@ linters:
         path: safetypes/.*\.go
       - linters:  # Returning "any" is the whole point
           - ireturn
-        path: it/.*\.go
-      - linters:  # TODO: REMOVE ME
-          - revive
         path: it/.*\.go
       - linters:
           - govet

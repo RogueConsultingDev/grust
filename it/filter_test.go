@@ -66,34 +66,3 @@ func TestFilter_PropagatesError(t *testing.T) {
 	assert.Empty(t, output)
 	assert.ErrorContains(t, err, "some error")
 }
-
-func Benchmark_Filter(b *testing.B) {
-	type S struct {
-		ID  int
-		I   int
-		S   string
-		B   bool
-		I32 int32
-		I64 int64
-		U32 uint32
-		U64 uint64
-		F32 float32
-		F64 float64
-	}
-
-	values := make([]S, 100)
-	for i := range values {
-		fake.Struct().Fill(&values[i])
-		(&values[i]).ID = i
-	}
-
-	filter := New(values).Filter(func(s S) bool { return s.ID%2 == 0 })
-
-	b.ReportAllocs()
-
-	for range b.N {
-		for range filter.it {
-
-		}
-	}
-}
