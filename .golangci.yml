@@ -44,13 +44,16 @@ linters:
           - errcheck
           - funlen
           - gochecknoglobals
+          - goconst
           - gocyclo
           - gosec
         path: _test\.go
       - linters:  # Returning "any" is the whole point
-          - interfacebloat
           - ireturn
         path: safetypes/.*\.go
+      - linters:  # Returning "any" is the whole point
+          - ireturn
+        path: it/.*\.go
       - linters:
           - govet
         text: 'shadow: declaration of "(err|ctx)" shadows declaration at'
