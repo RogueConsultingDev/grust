@@ -160,6 +160,21 @@ func (i *Iterator[T]) ForEach(f func(T)) error {
 	return nil
 }
 
+// Count consumes the iterator and returns the number of elements in it.
+func (i *Iterator[T]) Count() (int, error) {
+	c := 0
+
+	for _, err := range i.it {
+		if err != nil {
+			return 0, err
+		}
+
+		c++
+	}
+
+	return c, nil
+}
+
 // Copied dereferences all elements from the iterator into a slice.
 func Copied[T any](i *Iterator[*T]) ([]T, error) {
 	output := make([]T, 0)
