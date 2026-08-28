@@ -17,6 +17,7 @@ func (i *Iterator[T]) UniqueBy[U comparable](f func(T) U) *Iterator[T] {
 			}
 
 			k := f(v)
+
 			_, ok := seen[k]
 			if ok {
 				continue

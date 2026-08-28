@@ -24,15 +24,17 @@ func TestUniqueBy_FiltersOutRepeatedValues(t *testing.T) {
 	iter := New(values)
 
 	keyer := func(v NonCmpT) string {
-		var elems []string
+		var elems []string //nolint:prealloc // No need for testing code
 		for _, i := range v.v {
 			elems = append(elems, strconv.Itoa(i))
 		}
+
 		return strings.Join(elems, ";")
 	}
 
 	output, err := iter.UniqueBy(keyer).Collect()
 	require.NoError(t, err)
+
 	expected := []NonCmpT{
 		{v: []int{0}},
 		{v: []int{0, 1}},
