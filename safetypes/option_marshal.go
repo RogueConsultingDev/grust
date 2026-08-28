@@ -2,6 +2,7 @@ package st
 
 import "encoding/json"
 
+// MarshalJSON implements json.Marshaler.
 func (o *Option[T]) MarshalJSON() ([]byte, error) {
 	if o == nil || !o.ok {
 		return []byte("null"), nil
@@ -10,6 +11,7 @@ func (o *Option[T]) MarshalJSON() ([]byte, error) {
 	return json.Marshal(o.val) //nolint:wrapcheck // The source error is fine here
 }
 
+// UnmarshalJSON implements json.Unmarshaler.
 func (o *Option[T]) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {
 		o.ok = false
