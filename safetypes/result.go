@@ -37,30 +37,30 @@ func ResultOf[T any](val T, err error) *Result[T] {
 // MapResult maps a Result<T> to Result<U, E> by applying a function to a contained Ok value, leaving an Err value
 // untouched.
 //
-// Deprecated: Use Result[T].Map().
+// With Go 1.27+, use Result[T].Map().
 func MapResult[T any, U any](res *Result[T], f func(T) U) *Result[U] {
 	if res.IsErr() {
-		return Err[U](res.UnwrapErr())
+		return Err[U](res.err)
 	}
 
-	return Ok(f(res.Unwrap()))
+	return Ok(f(res.val))
 }
 
 // MapResultOr returns the provided default (if Err), or applies a function to the contained value (if Ok).
 //
-// Deprecated: Use Result[T].MapOr().
+// With Go 1.27+, use Result[T].MapOr().
 func MapResultOr[T any, U any](res *Result[T], def U, f func(T) U) U {
 	if res.IsErr() {
 		return def
 	}
 
-	return f(res.Unwrap())
+	return f(res.val)
 }
 
 // MapResultOrElse maps a Result<T> to U by applying fallback function default to a contained Err value, or function
 // f to a contained Ok value.
 //
-// Deprecated: Use Result[T].MapOrElse().
+// With Go 1.27+, use Result[T].MapOrElse().
 func MapResultOrElse[T any, U any](
 	res *Result[T],
 	factory func() U,
@@ -70,19 +70,19 @@ func MapResultOrElse[T any, U any](
 		return factory()
 	}
 
-	return mapper(res.Unwrap())
+	return mapper(res.val)
 }
 
 // MapResultErr maps a Result<T> to Result<T, F> by applying a function to a contained Err value, leaving an Ok value
 // untouched.
 //
-// Deprecated: Use Result[T].MapErr().
+// With Go 1.27+, use Result[T].MapErr().
 func MapResultErr[T any](res *Result[T], f func(error) error) *Result[T] {
 	if res.IsOk() {
 		return res
 	}
 
-	return Err[T](f(res.UnwrapErr()))
+	return Err[T](f(res.err))
 }
 
 // Result is a type that represents either success (Ok) or failure (Err).
@@ -119,7 +119,7 @@ func (r *Result[T]) MapErr(f func(error) error) *Result[T] {
 		return r
 	}
 
-	return Err[T](f(r.UnwrapErr()))
+	return Err[T](f(r.err))
 }
 
 // Expect returns the contained Ok value. Panics if the value is an Err, with a panic message including the passed

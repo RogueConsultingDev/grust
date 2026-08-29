@@ -9,7 +9,7 @@ func (o *Option[T]) Map[U any](f func(T) U) *Option[U] {
 		return None[U]()
 	}
 
-	return Some(f(o.Unwrap()))
+	return Some(f(o.val))
 }
 
 // MapOr returns the provided default result (if None), or applies a function to the contained value (if Some).
@@ -18,7 +18,7 @@ func (o *Option[T]) MapOr[U any](def U, f func(T) U) U {
 		return def
 	}
 
-	return f(o.Unwrap())
+	return f(o.val)
 }
 
 // MapOrElse computes a default function result (if None), or applies a different function to the contained value
@@ -28,7 +28,7 @@ func (o *Option[T]) MapOrElse[U any](factory func() U, f func(T) U) U {
 		return factory()
 	}
 
-	return f(o.Unwrap())
+	return f(o.val)
 }
 
 // And returns None if the option is None, otherwise returns `optb`.
@@ -46,5 +46,5 @@ func (o *Option[T]) AndThen[U any](f func(T) *Option[U]) *Option[U] {
 		return None[U]()
 	}
 
-	return f(o.Unwrap())
+	return f(o.val)
 }

@@ -36,43 +36,43 @@ func OptionOf[T any](val T) *Option[T] {
 // MapOption maps an Option<T> to Option<U> by applying a function to a contained value (if Some) or returns None
 // (if None).
 //
-// Deprecated: Use Option[T].Map().
+// With Go 1.27+, use Option[T].Map().
 func MapOption[T any, U any](opt *Option[T], f func(T) U) *Option[U] {
-	if opt.IsNone() {
+	if !opt.ok {
 		return None[U]()
 	}
 
-	return Some(f(opt.Unwrap()))
+	return Some(f(opt.val))
 }
 
 // MapOptionOr returns the provided default result (if None), or applies a function to the contained value (if Some).
 //
-// Deprecated: Use Option[T].MapOr().
+// With Go 1.27+, use Option[T].MapOr().
 func MapOptionOr[T any, U any](opt *Option[T], def U, f func(T) U) U {
-	if opt.IsNone() {
+	if !opt.ok {
 		return def
 	}
 
-	return f(opt.Unwrap())
+	return f(opt.val)
 }
 
 // MapOptionOrElse computes a default function result (if None), or applies a different function to the contained value
 // (if Some).
 //
-// Deprecated: Use Option[T].MapOrElse().
+// With Go 1.27+, use Option[T].MapOrElse().
 func MapOptionOrElse[T any, U any](opt *Option[T], factory func() U, f func(T) U) U {
-	if opt.IsNone() {
+	if !opt.ok {
 		return factory()
 	}
 
-	return f(opt.Unwrap())
+	return f(opt.val)
 }
 
 // And returns None if the Option is None, otherwise returns `optb`.
 //
-// Deprecated: Use Option[T].And().
+// With Go 1.27+, use Option[T].And().
 func And[T any, U any](opt *Option[T], other *Option[U]) *Option[U] {
-	if opt.IsNone() {
+	if !opt.ok {
 		return None[U]()
 	}
 
@@ -81,13 +81,13 @@ func And[T any, U any](opt *Option[T], other *Option[U]) *Option[U] {
 
 // AndThen returns None if the Option is None, otherwise calls `f` with the wrapped value and returns the result.
 //
-// Deprecated: Use Option[T].AndThen().
+// With Go 1.27+, use Option[T].AndThen().
 func AndThen[T any, U any](opt *Option[T], f func(T) *Option[U]) *Option[U] {
-	if opt.IsNone() {
+	if !opt.ok {
 		return None[U]()
 	}
 
-	return f(opt.Unwrap())
+	return f(opt.val)
 }
 
 // Option is a type that represents either a value (Some) or not (None).
@@ -229,15 +229,15 @@ func (o *Option[T]) OrElse(f func() *Option[T]) *Option[T] {
 
 // Xor returns Some if exactly one of self, optb is Some, otherwise returns None.
 func (o *Option[T]) Xor(other *Option[T]) *Option[T] {
-	if o.ok && other.IsNone() {
+	if o.ok == other.ok {
+		return None[T]()
+	}
+
+	if o.ok {
 		return o
 	}
 
-	if !o.ok && other.IsSome() {
-		return other
-	}
-
-	return None[T]()
+	return other
 }
 
 // Insert inserts value into the Option, then returns a mutable reference to it.

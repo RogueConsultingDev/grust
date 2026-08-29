@@ -6,10 +6,10 @@ package st
 // untouched.
 func (r *Result[T]) Map[U any](f func(T) U) *Result[U] {
 	if !r.ok {
-		return Err[U](r.UnwrapErr())
+		return Err[U](r.err)
 	}
 
-	return Ok(f(r.Unwrap()))
+	return Ok(f(r.val))
 }
 
 // MapOr returns the provided default (if Err), or applies a function to the contained value (if Ok).
@@ -18,7 +18,7 @@ func (r *Result[T]) MapOr[U any](def U, f func(T) U) U {
 		return def
 	}
 
-	return f(r.Unwrap())
+	return f(r.val)
 }
 
 // MapOrElse maps a Result<T> to U by applying fallback function default to a contained Err value, or function
@@ -28,5 +28,5 @@ func (r *Result[T]) MapOrElse[U any](factory func() U, mapper func(T) U) U {
 		return factory()
 	}
 
-	return mapper(r.Unwrap())
+	return mapper(r.val)
 }
