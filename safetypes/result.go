@@ -36,25 +36,31 @@ func ResultOf[T any](val T, err error) *Result[T] {
 
 // MapResult maps a Result<T> to Result<U, E> by applying a function to a contained Ok value, leaving an Err value
 // untouched.
+//
+// With Go 1.27+, use Result[T].Map().
 func MapResult[T any, U any](res *Result[T], f func(T) U) *Result[U] {
 	if res.IsErr() {
-		return Err[U](res.UnwrapErr())
+		return Err[U](res.err)
 	}
 
-	return Ok(f(res.Unwrap()))
+	return Ok(f(res.val))
 }
 
 // MapResultOr returns the provided default (if Err), or applies a function to the contained value (if Ok).
+//
+// With Go 1.27+, use Result[T].MapOr().
 func MapResultOr[T any, U any](res *Result[T], def U, f func(T) U) U {
 	if res.IsErr() {
 		return def
 	}
 
-	return f(res.Unwrap())
+	return f(res.val)
 }
 
 // MapResultOrElse maps a Result<T> to U by applying fallback function default to a contained Err value, or function
 // f to a contained Ok value.
+//
+// With Go 1.27+, use Result[T].MapOrElse().
 func MapResultOrElse[T any, U any](
 	res *Result[T],
 	factory func() U,
@@ -64,17 +70,19 @@ func MapResultOrElse[T any, U any](
 		return factory()
 	}
 
-	return mapper(res.Unwrap())
+	return mapper(res.val)
 }
 
 // MapResultErr maps a Result<T> to Result<T, F> by applying a function to a contained Err value, leaving an Ok value
 // untouched.
+//
+// With Go 1.27+, use Result[T].MapErr().
 func MapResultErr[T any](res *Result[T], f func(error) error) *Result[T] {
 	if res.IsOk() {
 		return res
 	}
 
-	return Err[T](f(res.UnwrapErr()))
+	return Err[T](f(res.err))
 }
 
 // Result is a type that represents either success (Ok) or failure (Err).
@@ -89,7 +97,7 @@ func (r *Result[T]) IsOk() bool {
 	return r.ok
 }
 
-// IsOkAnd returns `true` if the result is Ok and the value inside of it matches a predicate.
+// IsOkAnd returns `true` if the result is Ok and the value inside it matches a predicate.
 func (r *Result[T]) IsOkAnd(f func(T) bool) bool {
 	return r.ok && f(r.val)
 }
@@ -99,13 +107,23 @@ func (r *Result[T]) IsErr() bool {
 	return !r.ok
 }
 
-// IsErrAnd returns `true` if the result is Err and the value inside of it matches a predicate.
+// IsErrAnd returns `true` if the result is Err and the value inside it matches a predicate.
 func (r *Result[T]) IsErrAnd(f func(error) bool) bool {
 	return !r.ok && f(r.err)
 }
 
-// Expect returns the contained Ok value, consuming the self value. Panics if the value is an Err, with a panic
-// message including the passed message, and the content of the Err.
+// MapErr maps a Result<T> to Result<T, F> by applying a function to a contained Err value, leaving an Ok value
+// untouched.
+func (r *Result[T]) MapErr(f func(error) error) *Result[T] {
+	if r.ok {
+		return r
+	}
+
+	return Err[T](f(r.err))
+}
+
+// Expect returns the contained Ok value. Panics if the value is an Err, with a panic message including the passed
+// message, and the content of the Err.
 func (r *Result[T]) Expect(msg string) T {
 	if r.ok {
 		return r.val
@@ -114,8 +132,8 @@ func (r *Result[T]) Expect(msg string) T {
 	panic(fmt.Errorf("%s: %w", msg, r.err))
 }
 
-// ExpectErr returns the contained Err value, consuming the self value. Panics if the value is an Ok, with a panic
-// message including the passed message, and the content of the Ok.
+// ExpectErr returns the contained Err value. Panics if the value is an Ok, with a panic message including the passed
+// message, and the content of the Ok.
 func (r *Result[T]) ExpectErr(msg string) error {
 	if !r.ok {
 		return r.err
@@ -124,8 +142,8 @@ func (r *Result[T]) ExpectErr(msg string) error {
 	panic(fmt.Errorf("%s: %v", msg, r.val))
 }
 
-// Unwrap returns the contained Ok value, consuming the self value. Panics if the value is an Err, with a panic
-// message provided by the Err's value.
+// Unwrap returns the contained Ok value. Panics if the value is an Err, with a panic message provided by the Err's
+// value.
 func (r *Result[T]) Unwrap() T {
 	if r.ok {
 		return r.val
@@ -163,8 +181,8 @@ func (r *Result[T]) UnwrapOrDefault() T {
 	return def
 }
 
-// UnwrapErr returns the contained Err value, consuming the self value. Panics if the value is an Ok, with a custom
-// panic message provided by the Ok's value.
+// UnwrapErr returns the contained Err value. Panics if the value is an Ok, with a custom panic message provided by the
+// Ok's value.
 func (r *Result[T]) UnwrapErr() error {
 	if r.ok {
 		panic(fmt.Errorf("called `Result.UnwrapErr()` on an `Ok` value: %v", r.val))
@@ -191,7 +209,7 @@ func (r *Result[T]) InspectErr(f func(error)) *Result[T] {
 	return r
 }
 
-// AsOptionValue converts a Result to a Some when res is result.Ok or None when res is result.Err.
+// AsOptionValue converts a Result to a Some when res is a result.Ok or None when res is a result.Err.
 func (r *Result[T]) AsOptionValue() *Option[T] {
 	if r.ok {
 		return Some(r.val)
@@ -200,7 +218,7 @@ func (r *Result[T]) AsOptionValue() *Option[T] {
 	return None[T]()
 }
 
-// AsOptionErr converts a Result to a Some when res is result.Err or None when res is result.Ok.
+// AsOptionErr converts a Result to a Some when res is a result.Err or None when res is a result.Ok.
 func (r *Result[T]) AsOptionErr() *Option[error] {
 	if !r.ok {
 		return Some(r.err)

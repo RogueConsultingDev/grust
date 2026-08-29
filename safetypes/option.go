@@ -35,36 +35,44 @@ func OptionOf[T any](val T) *Option[T] {
 
 // MapOption maps an Option<T> to Option<U> by applying a function to a contained value (if Some) or returns None
 // (if None).
+//
+// With Go 1.27+, use Option[T].Map().
 func MapOption[T any, U any](opt *Option[T], f func(T) U) *Option[U] {
-	if opt.IsNone() {
+	if !opt.ok {
 		return None[U]()
 	}
 
-	return Some(f(opt.Unwrap()))
+	return Some(f(opt.val))
 }
 
 // MapOptionOr returns the provided default result (if None), or applies a function to the contained value (if Some).
+//
+// With Go 1.27+, use Option[T].MapOr().
 func MapOptionOr[T any, U any](opt *Option[T], def U, f func(T) U) U {
-	if opt.IsNone() {
+	if !opt.ok {
 		return def
 	}
 
-	return f(opt.Unwrap())
+	return f(opt.val)
 }
 
 // MapOptionOrElse computes a default function result (if None), or applies a different function to the contained value
 // (if Some).
+//
+// With Go 1.27+, use Option[T].MapOrElse().
 func MapOptionOrElse[T any, U any](opt *Option[T], factory func() U, f func(T) U) U {
-	if opt.IsNone() {
+	if !opt.ok {
 		return factory()
 	}
 
-	return f(opt.Unwrap())
+	return f(opt.val)
 }
 
 // And returns None if the Option is None, otherwise returns `optb`.
+//
+// With Go 1.27+, use Option[T].And().
 func And[T any, U any](opt *Option[T], other *Option[U]) *Option[U] {
-	if opt.IsNone() {
+	if !opt.ok {
 		return None[U]()
 	}
 
@@ -72,12 +80,14 @@ func And[T any, U any](opt *Option[T], other *Option[U]) *Option[U] {
 }
 
 // AndThen returns None if the Option is None, otherwise calls `f` with the wrapped value and returns the result.
+//
+// With Go 1.27+, use Option[T].AndThen().
 func AndThen[T any, U any](opt *Option[T], f func(T) *Option[U]) *Option[U] {
-	if opt.IsNone() {
+	if !opt.ok {
 		return None[U]()
 	}
 
-	return f(opt.Unwrap())
+	return f(opt.val)
 }
 
 // Option is a type that represents either a value (Some) or not (None).
@@ -114,8 +124,7 @@ func (o *Option[T]) IsSomeAnd(f func(T) bool) bool {
 	return f(o.val)
 }
 
-// Expect returns the contained Some value, consuming the self value. Panics if the value is a None with a custom
-// panic message provided by msg.
+// Expect returns the contained Some value. Panics if the value is a None with a custom panic message provided by msg.
 func (o *Option[T]) Expect(msg string) T {
 	if o.ok {
 		return o.val
@@ -124,7 +133,7 @@ func (o *Option[T]) Expect(msg string) T {
 	panic(errors.New(msg))
 }
 
-// Unwrap returns the contained Some value, consuming the self value. Panics if the self value equals None.
+// Unwrap returns the contained Some value. Panics if the value equals None.
 func (o *Option[T]) Unwrap() T {
 	if o.ok {
 		return o.val
@@ -190,8 +199,8 @@ func (o *Option[T]) Inspect(f func(T)) *Option[T] {
 }
 
 // Filter returns None if the Option is None, otherwise calls predicate with the wrapped value and returns:
-//   - Some(t) if predicate returns true (where t is the wrapped value), and
-//   - None if predicate returns false.
+//   - Some(t) if the predicate returns true (where t is the wrapped value), and
+//   - None if the predicate returns false.
 func (o *Option[T]) Filter(f func(T) bool) *Option[T] {
 	if o.ok && f(o.val) {
 		return o
@@ -220,15 +229,15 @@ func (o *Option[T]) OrElse(f func() *Option[T]) *Option[T] {
 
 // Xor returns Some if exactly one of self, optb is Some, otherwise returns None.
 func (o *Option[T]) Xor(other *Option[T]) *Option[T] {
-	if o.ok && other.IsNone() {
+	if o.ok == other.ok {
+		return None[T]()
+	}
+
+	if o.ok {
 		return o
 	}
 
-	if !o.ok && other.IsSome() {
-		return other
-	}
-
-	return None[T]()
+	return other
 }
 
 // Insert inserts value into the Option, then returns a mutable reference to it.
@@ -243,7 +252,7 @@ func (o *Option[T]) Insert(val T) *T {
 	return &o.val
 }
 
-// GetOrInsert inserts value into the Option if it is None, then returns a pointer to the contained value.
+// GetOrInsert inserts the value into the Option if it is None, then returns a pointer to the contained value.
 //
 // See also Insert, which updates the value even if the Option already contains Some.
 func (o *Option[T]) GetOrInsert(val T) *T {

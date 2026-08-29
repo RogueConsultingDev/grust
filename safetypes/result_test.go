@@ -283,6 +283,39 @@ func TestResult_IsErrAnd(t *testing.T) {
 	})
 }
 
+func TestResult_MapErr(t *testing.T) {
+	t.Run("ok", func(t *testing.T) {
+		value := fake.Int()
+		o := Ok[int](value)
+
+		f := func(error) error {
+			assert.Fail(t, "mapper should not have been called")
+
+			return nil
+		}
+
+		expected := Ok[int](value)
+
+		assert.Equal(t, expected, o.MapErr(f))
+	})
+
+	t.Run("err", func(t *testing.T) {
+		err := fmt.Errorf("some error: %s", fake.RandomStringWithLength(8))
+		e := Err[any](err)
+
+		newE := &MockError{e: fmt.Errorf("mapped error: %w", err).Error()}
+		f := func(e error) error {
+			assert.Equal(t, e, err)
+
+			return newE
+		}
+
+		expected := Err[any](newE)
+
+		assert.Equal(t, expected, e.MapErr(f))
+	})
+}
+
 func TestResult_Expect(t *testing.T) {
 	t.Run("Ok", func(t *testing.T) {
 		val := fake.Int()
