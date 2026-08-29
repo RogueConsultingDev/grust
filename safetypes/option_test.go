@@ -889,7 +889,3 @@ func TestOption_String(t *testing.T) {
 		assert.Equal(t, expected, o.String())
 	})
 }
-
-func ptr[T any](v T) *T {
-	return &v
-}

@@ -5,3 +5,7 @@ import (
 )
 
 var fake = faker.New()
+
+func ptr[T any](v T) *T {
+	return &v
+}
