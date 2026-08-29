@@ -21,37 +21,37 @@ func TestValidations(t *testing.T) {
 	}{
 		{
 			"valid string",
-			*Some[any]("valid"),
+			Some[any]("valid"),
 			"",
 		},
 		{
 			"valid empty string",
-			*Some[any](""),
+			Some[any](""),
 			"",
 		},
 		{
 			"invalid string",
-			*Some[any]("too long"),
+			Some[any]("too long"),
 			"max",
 		},
 		{
 			"valid int value",
-			*Some[any](3),
+			Some[any](3),
 			"",
 		},
 		{
 			"valid zero int",
-			*Some[any](0),
+			Some[any](0),
 			"",
 		},
 		{
 			"invalid int",
-			*Some[any](6),
+			Some[any](6),
 			"max",
 		},
 		{
 			"none",
-			*None[any](),
+			None[any](),
 			"required",
 		},
 	}

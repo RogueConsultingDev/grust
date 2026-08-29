@@ -171,7 +171,7 @@ func TestAndThen_ReturnsMappedOptionOrNone(t *testing.T) {
 		s := Some(val)
 
 		other := Some(fake.RandomStringWithLength(8))
-		f := func(o int) *Option[string] {
+		f := func(o int) Option[string] {
 			assert.Equal(t, val, o)
 
 			return other
@@ -183,7 +183,7 @@ func TestAndThen_ReturnsMappedOptionOrNone(t *testing.T) {
 	t.Run("none", func(t *testing.T) {
 		n := None[int]()
 
-		f := func(int) *Option[string] {
+		f := func(int) Option[string] {
 			assert.Fail(t, "mapper should not have been called")
 
 			return None[string]()
@@ -467,7 +467,7 @@ func TestOption_Inspect(t *testing.T) {
 			assert.Equal(t, val, v)
 		}
 
-		assert.Same(t, o, o.Inspect(predicate))
+		assert.Equal(t, o, o.Inspect(predicate))
 		assert.True(t, called)
 	})
 
@@ -478,7 +478,7 @@ func TestOption_Inspect(t *testing.T) {
 			assert.Fail(t, "predicate should not be called")
 		}
 
-		assert.Same(t, o, o.Inspect(predicate))
+		assert.Equal(t, o, o.Inspect(predicate))
 	})
 }
 
@@ -552,7 +552,7 @@ func TestOption_OrElse(t *testing.T) {
 		val := fake.Int()
 		o := Some(val)
 
-		otherFactory := func() *Option[int] {
+		otherFactory := func() Option[int] {
 			assert.Fail(t, "factory should not be called")
 
 			return Some(fake.Int())
@@ -565,7 +565,7 @@ func TestOption_OrElse(t *testing.T) {
 		o := None[int]()
 
 		other := Some(fake.Int())
-		otherFactory := func() *Option[int] {
+		otherFactory := func() Option[int] {
 			return other
 		}
 
@@ -585,7 +585,7 @@ func TestOption_Xor(t *testing.T) {
 
 		t.Run("other is none", func(t *testing.T) {
 			other := None[int]()
-			assert.Same(t, o, o.Xor(other))
+			assert.Equal(t, o, o.Xor(other))
 		})
 	})
 
@@ -594,7 +594,7 @@ func TestOption_Xor(t *testing.T) {
 
 		t.Run("other is some", func(t *testing.T) {
 			other := Some(fake.Int())
-			assert.Same(t, other, o.Xor(other))
+			assert.Equal(t, other, o.Xor(other))
 		})
 
 		t.Run("other is none", func(t *testing.T) {
@@ -614,7 +614,7 @@ func TestOption_Insert(t *testing.T) {
 
 		assert.Equal(t, newVal, *res)
 
-		expected := &Option[int]{
+		expected := Option[int]{
 			ok:  true,
 			val: newVal,
 		}
@@ -634,7 +634,7 @@ func TestOption_Insert(t *testing.T) {
 
 		assert.Equal(t, newVal, *res)
 
-		expected := &Option[int]{
+		expected := Option[int]{
 			ok:  true,
 			val: newVal,
 		}
@@ -657,7 +657,7 @@ func TestOption_GetOrInsert(t *testing.T) {
 
 		assert.Equal(t, val, *res)
 
-		expected := &Option[int]{
+		expected := Option[int]{
 			ok:  true,
 			val: val,
 		}
@@ -677,7 +677,7 @@ func TestOption_GetOrInsert(t *testing.T) {
 
 		assert.Equal(t, newVal, *res)
 
-		expected := &Option[int]{
+		expected := Option[int]{
 			ok:  true,
 			val: newVal,
 		}
@@ -699,7 +699,7 @@ func TestOption_GetOrInsertDefault(t *testing.T) {
 
 		assert.Equal(t, val, *res)
 
-		expected := &Option[int]{
+		expected := Option[int]{
 			ok:  true,
 			val: val,
 		}
@@ -718,7 +718,7 @@ func TestOption_GetOrInsertDefault(t *testing.T) {
 
 		assert.Equal(t, 0, *res)
 
-		expected := &Option[int]{
+		expected := Option[int]{
 			ok:  true,
 			val: 0,
 		}
@@ -746,7 +746,7 @@ func TestOption_GetOrInsertWith(t *testing.T) {
 
 		assert.Equal(t, val, *res)
 
-		expected := &Option[int]{
+		expected := Option[int]{
 			ok:  true,
 			val: val,
 		}
@@ -769,7 +769,7 @@ func TestOption_GetOrInsertWith(t *testing.T) {
 
 		assert.Equal(t, newVal, *res)
 
-		expected := &Option[int]{
+		expected := Option[int]{
 			ok:  true,
 			val: newVal,
 		}
@@ -888,4 +888,8 @@ func TestOption_String(t *testing.T) {
 
 		assert.Equal(t, expected, o.String())
 	})
+}
+
+func ptr[T any](v T) *T {
+	return &v
 }

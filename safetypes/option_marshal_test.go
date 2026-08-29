@@ -47,7 +47,7 @@ func TestMarshalJSON(t *testing.T) {
 			struct {
 				Name string
 				Job  *Option[string]
-			}{"Poor Schmuck", None[string]()},
+			}{"Poor Schmuck", ptr(None[string]())},
 			`{"Name": "Poor Schmuck", "Job": null}`,
 		},
 		{
@@ -55,7 +55,7 @@ func TestMarshalJSON(t *testing.T) {
 			struct {
 				Name string
 				Job  *Option[string]
-			}{"Mega Chad", Some("Big Boss")},
+			}{"Mega Chad", ptr(Some("Big Boss"))},
 			`{"Name": "Mega Chad", "Job": "Big Boss"}`,
 		},
 	}
@@ -125,7 +125,7 @@ func TestUnmarshalText(t *testing.T) {
 		err := json.Unmarshal([]byte(`{"Name": "Poor Schmuck", "Job": null}`), &o)
 		require.NoError(t, err)
 
-		expected := Option[S]{ok: true, val: S{"Poor Schmuck", *None[string]()}}
+		expected := Option[S]{ok: true, val: S{"Poor Schmuck", None[string]()}}
 		assert.Equal(t, expected, o)
 	})
 
@@ -139,7 +139,7 @@ func TestUnmarshalText(t *testing.T) {
 		err := json.Unmarshal([]byte(`{"Name": "Mega Chad", "Job": "Big Boss"}`), &o)
 		require.NoError(t, err)
 
-		expected := Option[S]{ok: true, val: S{"Mega Chad", *Some("Big Boss")}}
+		expected := Option[S]{ok: true, val: S{"Mega Chad", Some("Big Boss")}}
 		assert.Equal(t, expected, o)
 	})
 

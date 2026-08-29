@@ -210,7 +210,7 @@ func (r *Result[T]) InspectErr(f func(error)) *Result[T] {
 }
 
 // AsOptionValue converts a Result to a Some when res is a result.Ok or None when res is a result.Err.
-func (r *Result[T]) AsOptionValue() *Option[T] {
+func (r *Result[T]) AsOptionValue() Option[T] {
 	if r.ok {
 		return Some(r.val)
 	}
@@ -219,7 +219,7 @@ func (r *Result[T]) AsOptionValue() *Option[T] {
 }
 
 // AsOptionErr converts a Result to a Some when res is a result.Err or None when res is a result.Ok.
-func (r *Result[T]) AsOptionErr() *Option[error] {
+func (r *Result[T]) AsOptionErr() Option[error] {
 	if !r.ok {
 		return Some(r.err)
 	}
