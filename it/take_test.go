@@ -67,3 +67,54 @@ func TestTake_PropagatesError(t *testing.T) {
 	assert.Empty(t, output)
 	assert.ErrorContains(t, err, "some error")
 }
+
+func TestSkip_SkipsTheFirstNElements(t *testing.T) {
+	values := []int{1, 2, 3, 4, 5}
+
+	output, err := New(values).Skip(3).Collect()
+
+	require.NoError(t, err)
+	assert.Equal(t, []int{4, 5}, output)
+}
+
+func TestSkip_StopsIfUnderlyingIteratorHasNoMoreElements(t *testing.T) {
+	values := []int{1, 2}
+
+	output, err := New(values).Skip(3).Collect()
+
+	require.NoError(t, err)
+	assert.Equal(t, []int{}, output)
+
+	values = []int{}
+
+	output, err = New(values).Skip(3).Collect()
+
+	require.NoError(t, err)
+	assert.Equal(t, []int{}, output)
+}
+
+func TestSkip_PropagatesError(t *testing.T) {
+	iter := &Iterator[int]{
+		it: func(yield func(int, error) bool) {
+			// Skipped
+			if !yield(1, nil) {
+				return
+			}
+
+			// Skipped
+			if !yield(2, errors.New("skipped error")) {
+				return
+			}
+
+			if !yield(42, errors.New("some error")) {
+				return
+			}
+
+			require.Fail(t, "Should not reach this point")
+		},
+	}
+
+	output, err := iter.Skip(2).Collect()
+	assert.Empty(t, output)
+	assert.ErrorContains(t, err, "some error")
+}

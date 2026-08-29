@@ -4,6 +4,7 @@ linters:
   disable:
     - depguard
     - err113
+    - exhaustruct # Deprecated in favour of exhaustruct_v5
     - gomodguard
     - paralleltest
     - testpackage

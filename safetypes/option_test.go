@@ -56,7 +56,7 @@ func TestFrom_ReturnsNewOptionFromArgs(t *testing.T) {
 		res4 := OptionOf(false)
 		assert.True(t, res4.IsNone())
 
-		res5 := OptionOf(S{}) //nolint:exhaustruct  // We want the zero value
+		res5 := OptionOf(S{}) //nolint:exhaustruct_v5  // We want the zero value
 		assert.True(t, res5.IsNone())
 
 		res6 := OptionOf((*string)(nil))

@@ -389,18 +389,6 @@ func TestPosition_PropagatesError(t *testing.T) {
 	assert.Zero(t, output)
 }
 
-func TestCopied_CopiesTheIterInASlice(t *testing.T) {
-	values := []*int{ptr(1), ptr(2), ptr(3), ptr(4), ptr(5)}
-	output, err := Copied(New(values))
-	require.NoError(t, err)
-
-	assert.Len(t, output, len(values))
-
-	for i, v := range output {
-		assert.Equal(t, *values[i], v)
-	}
-}
-
 func TestForEach_AppliesTheFunctionToAllElements(t *testing.T) {
 	type S struct {
 		i int
@@ -447,6 +435,53 @@ func TestForEach_StopsOnError(t *testing.T) {
 	require.ErrorContains(t, err, "some error")
 
 	assert.True(t, called)
+}
+
+func TestCount_AppliesTheFunctionToAllElements(t *testing.T) {
+	n := fake.IntBetween(5, 25)
+	values := fake.Lorem().Words(n)
+
+	c, err := New(values).Count()
+	require.NoError(t, err)
+
+	assert.Equal(t, n, c)
+}
+
+func TestCount_PropagatesError(t *testing.T) {
+	iter := &Iterator[int]{
+		it: func(yield func(int, error) bool) {
+			if !yield(1, nil) {
+				return
+			}
+
+			if !yield(42, errors.New("some error")) {
+				return
+			}
+
+			require.Fail(t, "Should not reach this point")
+
+			if !yield(2, nil) {
+				return
+			}
+		},
+	}
+
+	c, err := iter.Count()
+	require.ErrorContains(t, err, "some error")
+
+	assert.Zero(t, c)
+}
+
+func TestCopied_CopiesTheIterInASlice(t *testing.T) {
+	values := []*int{ptr(1), ptr(2), ptr(3), ptr(4), ptr(5)}
+	output, err := Copied(New(values))
+	require.NoError(t, err)
+
+	assert.Len(t, output, len(values))
+
+	for i, v := range output {
+		assert.Equal(t, *values[i], v)
+	}
 }
 
 func TestCopied_PropagatesError(t *testing.T) {
