@@ -1,891 +1,115 @@
 package st
 
 import (
-	"errors"
-	"fmt"
-	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestFrom_ReturnsNewOptionFromArgs(t *testing.T) {
-	type S struct {
-		value int
-	}
+func TestOption_Scan(t *testing.T) {
+	t.Run("scan int", func(t *testing.T) {
+		o := Some(fake.Int())
 
-	t.Run("some", func(t *testing.T) {
-		res1 := OptionOf(fake.IntBetween(1, 100))
-		assert.True(t, res1.IsSome())
-
-		res2 := OptionOf(fake.Float(2, 1, 100))
-		assert.True(t, res2.IsSome())
-
-		res3 := OptionOf(fake.RandomStringWithLength(8))
-		assert.True(t, res3.IsSome())
-
-		res4 := OptionOf(true)
-		assert.True(t, res4.IsSome())
-
-		res5 := OptionOf(S{value: 1})
-		assert.True(t, res5.IsSome())
-
-		zeroInt := 0
-		res6 := OptionOf(&zeroInt)
-		assert.True(t, res6.IsSome())
-
-		zeroStr := ""
-		res7 := OptionOf(&zeroStr)
-		assert.True(t, res7.IsSome())
-
-		var zeroS S
-		res8 := OptionOf(&zeroS)
-		assert.True(t, res8.IsSome())
-	})
-
-	t.Run("none", func(t *testing.T) {
-		res1 := OptionOf(0)
-		assert.True(t, res1.IsNone())
-
-		res2 := OptionOf(0.0)
-		assert.True(t, res2.IsNone())
-
-		res3 := OptionOf("")
-		assert.True(t, res3.IsNone())
-
-		res4 := OptionOf(false)
-		assert.True(t, res4.IsNone())
-
-		res5 := OptionOf(S{}) //nolint:exhaustruct_v5  // We want the zero value
-		assert.True(t, res5.IsNone())
-
-		res6 := OptionOf((*string)(nil))
-		assert.True(t, res6.IsNone())
-	})
-}
-
-func TestMapOption_ReturnsANewOptionWithMappedOptionValue(t *testing.T) {
-	t.Run("some", func(t *testing.T) {
 		val := fake.Int()
-		s := Some(val)
+		err := o.Scan(val)
+		require.NoError(t, err)
 
-		expected := Some(strconv.Itoa(val))
-
-		assert.Equal(t, expected, MapOption(s, strconv.Itoa))
+		assert.Equal(t, Some(val), o)
 	})
 
-	t.Run("none", func(t *testing.T) {
-		n := None[int]()
+	t.Run("scan float", func(t *testing.T) {
+		o := Some(fake.Float64(2, 0, 100000))
 
-		f := func(int) int {
-			assert.Fail(t, "mapper should not have been called")
+		val := fake.Float64(2, 0, 100000)
+		err := o.Scan(val)
+		require.NoError(t, err)
 
-			return 0
-		}
-
-		assert.Equal(t, None[int](), MapOption(n, f))
+		assert.Equal(t, Some[float64](val), o)
 	})
-}
 
-func TestMapOptionOr_ReturnsTheMappedOptionValueOrDefault(t *testing.T) {
-	t.Run("some", func(t *testing.T) {
+	t.Run("scan string", func(t *testing.T) {
+		o := Some(fake.RandomStringWithLength(8))
+
+		val := fake.RandomStringWithLength(8)
+		err := o.Scan(val)
+		require.NoError(t, err)
+
+		assert.Equal(t, Some[string](val), o)
+	})
+
+	t.Run("scan bool", func(t *testing.T) {
+		o := Some(fake.Bool())
+
+		val := fake.Bool()
+		err := o.Scan(val)
+		require.NoError(t, err)
+
+		assert.Equal(t, Some[bool](val), o)
+	})
+
+	t.Run("scan to pointer", func(t *testing.T) {
+		o := Some(ptr(fake.Int()))
+
 		val := fake.Int()
-		s := Some(val)
+		err := o.Scan(val)
+		require.NoError(t, err)
 
-		def := fake.RandomStringWithLength(9)
-
-		expected := strconv.Itoa(val)
-
-		assert.Equal(t, expected, MapOptionOr(s, def, strconv.Itoa))
+		assert.Equal(t, Some[*int](ptr(val)), o)
 	})
 
-	t.Run("none", func(t *testing.T) {
-		n := None[int]()
+	t.Run("type conversion", func(t *testing.T) {
+		// We should be able to assign an int32 to an int64
+		o := Some[int64](0)
 
-		def := fake.RandomStringWithLength(9)
-		f := func(int) string {
-			assert.Fail(t, "mapper should not have been called")
+		val := fake.Int32()
+		err := o.Scan(val)
+		require.NoError(t, err)
 
-			return ""
-		}
-
-		assert.Equal(t, def, MapOptionOr(n, def, f))
-	})
-}
-
-func TestMapOptionOrElse_ReturnsTheMappedOptionValueOrCallsDefaultFactory(t *testing.T) {
-	t.Run("some", func(t *testing.T) {
-		val := fake.Int()
-		s := Some(val)
-
-		factory := func() string {
-			assert.Fail(t, "factory should not have been called")
-
-			return fake.RandomStringWithLength(9)
-		}
-
-		expected := strconv.Itoa(val)
-
-		assert.Equal(t, expected, MapOptionOrElse(s, factory, strconv.Itoa))
+		assert.Equal(t, Some[int64](int64(val)), o)
 	})
 
-	t.Run("none", func(t *testing.T) {
-		n := None[int]()
+	t.Run("nil value scans to none", func(t *testing.T) {
+		o := Some("")
 
-		mapper := func(int) string {
-			assert.Fail(t, "mapper should not have been called")
+		err := o.Scan(nil)
+		require.NoError(t, err)
 
-			return ""
-		}
-		def := fake.RandomStringWithLength(9)
-		factory := func() string {
-			return def
-		}
+		assert.Equal(t, None[string](), o)
+	})
 
-		assert.Equal(t, def, MapOptionOrElse(n, factory, mapper))
+	t.Run("incompatible types", func(t *testing.T) {
+		o := Some(0)
+
+		err := o.Scan(fake.RandomStringWithLength(8))
+		require.ErrorContains(t, err, "invalid type for *st.Option[int]: string")
+	})
+
+	t.Run("can't assign to nil ptr", func(t *testing.T) {
+		o := Some[*string](nil)
+
+		err := o.Scan(fake.RandomStringWithLength(8))
+		require.ErrorContains(t, err, "can't assign value to nil pointer of type *string")
 	})
 }
 
-func TestAnd_ReturnsOtherOrNone(t *testing.T) {
-	t.Run("some", func(t *testing.T) {
-		val := fake.Int()
-		s := Some(val)
-
-		other := Some(fake.RandomStringWithLength(8))
-
-		assert.Equal(t, other, And(s, other))
-	})
-
-	t.Run("none", func(t *testing.T) {
-		n := None[int]()
-
-		other := Some(fake.RandomStringWithLength(8))
-
-		assert.Equal(t, None[string](), And(n, other))
-	})
-}
-
-func TestAndThen_ReturnsMappedOptionOrNone(t *testing.T) {
-	t.Run("some", func(t *testing.T) {
-		val := fake.Int()
-		s := Some(val)
-
-		other := Some(fake.RandomStringWithLength(8))
-		f := func(o int) *Option[string] {
-			assert.Equal(t, val, o)
-
-			return other
-		}
-
-		assert.Equal(t, other, AndThen(s, f))
-	})
-
-	t.Run("none", func(t *testing.T) {
-		n := None[int]()
-
-		f := func(int) *Option[string] {
-			assert.Fail(t, "mapper should not have been called")
-
-			return None[string]()
-		}
-
-		assert.Equal(t, None[string](), AndThen(n, f))
-	})
-}
-
-func TestOption_IsNone(t *testing.T) {
-	t.Run("Some", func(t *testing.T) {
-		val := fake.Int()
-		o := Some(val)
-
-		assert.False(t, o.IsNone())
-	})
-
-	t.Run("None", func(t *testing.T) {
-		o := None[int]()
-
-		assert.True(t, o.IsNone())
-	})
-}
-
-func TestOption_IsNoneOr(t *testing.T) {
-	t.Run("Some", func(t *testing.T) {
-		val := fake.Int()
-		o := Some(val)
-
-		for _, res := range []bool{true, false} {
-			name := fmt.Sprintf("predicate returns %v", res)
-			t.Run(name, func(t *testing.T) {
-				called := false
-
-				f := func(v int) bool {
-					called = true
-
-					assert.Equal(t, val, v)
-
-					return res
-				}
-
-				assert.Equal(t, res, o.IsNoneOr(f))
-				assert.True(t, called, "predicate should have been called")
-			})
-		}
-	})
-
-	t.Run("None", func(t *testing.T) {
-		o := None[int]()
-
-		for _, res := range []bool{true, false} {
-			name := fmt.Sprintf("predicate returns %v", res)
-			t.Run(name, func(t *testing.T) {
-				f := func(int) bool {
-					assert.Fail(t, "predicate should not be called")
-
-					return res
-				}
-
-				assert.True(t, o.IsNoneOr(f))
-			})
-		}
-	})
-}
-
-func TestOption_IsSome(t *testing.T) {
-	t.Run("Some", func(t *testing.T) {
-		val := fake.Int()
-		o := Some(val)
-
-		assert.True(t, o.IsSome())
-	})
-
-	t.Run("None", func(t *testing.T) {
-		o := None[int]()
-
-		assert.False(t, o.IsSome())
-	})
-}
-
-func TestOption_IsSomeAnd(t *testing.T) {
-	t.Run("Some", func(t *testing.T) {
-		val := fake.Int()
-		o := Some(val)
-
-		for _, res := range []bool{true, false} {
-			name := fmt.Sprintf("predicate returns %v", res)
-			t.Run(name, func(t *testing.T) {
-				called := false
-
-				f := func(v int) bool {
-					called = true
-
-					assert.Equal(t, val, v)
-
-					return res
-				}
-
-				assert.Equal(t, res, o.IsSomeAnd(f))
-				assert.True(t, called, "predicate should have been called")
-			})
-		}
-	})
-
-	t.Run("None", func(t *testing.T) {
-		o := None[int]()
-
-		for _, res := range []bool{true, false} {
-			name := fmt.Sprintf("predicate returns %v", res)
-			t.Run(name, func(t *testing.T) {
-				f := func(int) bool {
-					assert.Fail(t, "predicate should not be called")
-
-					return res
-				}
-
-				assert.False(t, o.IsSomeAnd(f))
-			})
-		}
-	})
-}
-
-func TestOption_Expect(t *testing.T) {
-	t.Run("Some", func(t *testing.T) {
-		val := fake.Int()
-		o := Some(val)
-
-		assert.Equal(t, val, o.Expect(fake.RandomStringWithLength(8)))
-	})
-
-	t.Run("None", func(t *testing.T) {
-		o := None[int]()
-
-		msg := fake.RandomStringWithLength(8)
-		assert.PanicsWithError(t, msg, func() {
-			o.Expect(msg)
-		})
-	})
-}
-
-func TestOption_Unwrap(t *testing.T) {
-	t.Run("Some", func(t *testing.T) {
-		val := fake.Int()
-		o := Some(val)
-
-		assert.Equal(t, val, o.Unwrap())
-	})
-
-	t.Run("None", func(t *testing.T) {
-		o := None[int]()
-
-		assert.PanicsWithError(t, "called `Option.Unwrap()` on a `None` value", func() {
-			o.Unwrap()
-		})
-	})
-}
-
-func TestOption_UnwrapOr(t *testing.T) {
-	t.Run("Some", func(t *testing.T) {
-		val := fake.Int()
-		o := Some(val)
-
-		assert.Equal(t, val, o.UnwrapOr(fake.Int()))
-	})
-
-	t.Run("None", func(t *testing.T) {
-		o := None[int]()
-
-		fallback := fake.Int()
-
-		assert.Equal(t, fallback, o.UnwrapOr(fallback))
-	})
-}
-
-func TestOption_UnwrapOrElse(t *testing.T) {
-	t.Run("Some", func(t *testing.T) {
-		val := fake.Int()
-		o := Some(val)
-
-		predicate := func() int {
-			assert.Fail(t, "predicate should not be called")
-
-			return 0
-		}
-
-		assert.Equal(t, val, o.UnwrapOrElse(predicate))
-	})
-
-	t.Run("None", func(t *testing.T) {
-		o := None[int]()
-
-		fallback := fake.Int()
-
-		predicate := func() int {
-			return fallback
-		}
-
-		assert.Equal(t, fallback, o.UnwrapOrElse(predicate))
-	})
-}
-
-func TestOption_UnwrapOrDefault(t *testing.T) {
-	t.Run("Some", func(t *testing.T) {
-		val := fake.Int()
-		o := Some(val)
-
-		assert.Equal(t, val, o.UnwrapOrDefault())
-	})
-
-	t.Run("None", func(t *testing.T) {
-		oi := None[int]()
-
-		assert.Equal(t, 0, oi.UnwrapOrDefault())
-
-		os := None[string]()
-
-		assert.Empty(t, os.UnwrapOrDefault())
-	})
-}
-
-func TestAsOkOr(t *testing.T) {
+func TestOption_Value(t *testing.T) {
 	t.Run("some", func(t *testing.T) {
 		val := fake.Int()
 		o := Some(val)
 
-		expected := Ok[int](val)
+		res, err := o.Value()
+		require.NoError(t, err)
 
-		assert.Equal(t, expected, o.AsOkOr(errors.New(fake.RandomStringWithLength(8))))
+		assert.Equal(t, val, res)
 	})
 
 	t.Run("none", func(t *testing.T) {
 		o := None[int]()
-		err := errors.New(fake.RandomStringWithLength(8))
 
-		expected := Err[int](err)
+		res, err := o.Value()
+		require.NoError(t, err)
 
-		assert.Equal(t, expected, o.AsOkOr(err))
-	})
-}
-
-func TestAsOkOrElse(t *testing.T) {
-	t.Run("some", func(t *testing.T) {
-		val := fake.Int()
-		o := Some(val)
-
-		f := func() error {
-			assert.Fail(t, "should not be called")
-
-			return errors.New(fake.RandomStringWithLength(8))
-		}
-
-		expected := Ok[int](val)
-
-		assert.Equal(t, expected, o.AsOkOrElse(f))
-	})
-
-	t.Run("none", func(t *testing.T) {
-		o := None[int]()
-		err := errors.New(fake.RandomStringWithLength(8))
-
-		f := func() error {
-			return err
-		}
-
-		expected := Err[int](err)
-
-		assert.Equal(t, expected, o.AsOkOrElse(f))
-	})
-}
-
-func TestOption_Inspect(t *testing.T) {
-	t.Run("Some", func(t *testing.T) {
-		val := fake.Int()
-		o := Some(val)
-
-		called := false
-		predicate := func(v int) {
-			called = true
-
-			assert.Equal(t, val, v)
-		}
-
-		assert.Same(t, o, o.Inspect(predicate))
-		assert.True(t, called)
-	})
-
-	t.Run("None", func(t *testing.T) {
-		o := None[int]()
-
-		predicate := func(int) {
-			assert.Fail(t, "predicate should not be called")
-		}
-
-		assert.Same(t, o, o.Inspect(predicate))
-	})
-}
-
-func TestOption_Filter(t *testing.T) {
-	t.Run("Some", func(t *testing.T) {
-		val := fake.Int()
-		o := Some(val)
-
-		for _, res := range []bool{true, false} {
-			name := fmt.Sprintf("predicate returns %v", res)
-			t.Run(name, func(t *testing.T) {
-				called := false
-				f := func(v int) bool {
-					called = true
-
-					assert.Equal(t, val, v)
-
-					return res
-				}
-
-				if res {
-					assert.Equal(t, o, o.Filter(f))
-				} else {
-					assert.Equal(t, None[int](), o.Filter(f))
-				}
-
-				assert.True(t, called, "predicate should have been called")
-			})
-		}
-	})
-
-	t.Run("None", func(t *testing.T) {
-		o := None[int]()
-
-		for _, res := range []bool{true, false} {
-			name := fmt.Sprintf("predicate returns %v", res)
-			t.Run(name, func(t *testing.T) {
-				f := func(int) bool {
-					assert.Fail(t, "predicate should not be called")
-
-					return res
-				}
-
-				assert.Equal(t, None[int](), o.Filter(f))
-			})
-		}
-	})
-}
-
-func TestOption_Or(t *testing.T) {
-	t.Run("Some", func(t *testing.T) {
-		val := fake.Int()
-		o := Some(val)
-
-		other := Some(fake.Int())
-
-		assert.Equal(t, o, o.Or(other))
-	})
-
-	t.Run("None", func(t *testing.T) {
-		o := None[int]()
-
-		other := Some(fake.Int())
-
-		assert.Equal(t, other, o.Or(other))
-	})
-}
-
-func TestOption_OrElse(t *testing.T) {
-	t.Run("Some", func(t *testing.T) {
-		val := fake.Int()
-		o := Some(val)
-
-		otherFactory := func() *Option[int] {
-			assert.Fail(t, "factory should not be called")
-
-			return Some(fake.Int())
-		}
-
-		assert.Equal(t, o, o.OrElse(otherFactory))
-	})
-
-	t.Run("None", func(t *testing.T) {
-		o := None[int]()
-
-		other := Some(fake.Int())
-		otherFactory := func() *Option[int] {
-			return other
-		}
-
-		assert.Equal(t, other, o.OrElse(otherFactory))
-	})
-}
-
-func TestOption_Xor(t *testing.T) {
-	t.Run("Some", func(t *testing.T) {
-		val := fake.Int()
-		o := Some(val)
-
-		t.Run("other is some", func(t *testing.T) {
-			other := Some(fake.Int())
-			assert.Equal(t, None[int](), o.Xor(other))
-		})
-
-		t.Run("other is none", func(t *testing.T) {
-			other := None[int]()
-			assert.Same(t, o, o.Xor(other))
-		})
-	})
-
-	t.Run("None", func(t *testing.T) {
-		o := None[int]()
-
-		t.Run("other is some", func(t *testing.T) {
-			other := Some(fake.Int())
-			assert.Same(t, other, o.Xor(other))
-		})
-
-		t.Run("other is none", func(t *testing.T) {
-			other := None[int]()
-			assert.Equal(t, None[int](), o.Xor(other))
-		})
-	})
-}
-
-func TestOption_Insert(t *testing.T) {
-	t.Run("Some", func(t *testing.T) {
-		val := fake.Int()
-		o := Some(val)
-
-		newVal := fake.Int()
-		res := o.Insert(newVal)
-
-		assert.Equal(t, newVal, *res)
-
-		expected := &Option[int]{
-			ok:  true,
-			val: newVal,
-		}
-		assert.Equal(t, expected, o)
-
-		// Assert that we can directly change the Option's value with the pointer
-		newVal = fake.Int()
-		*res = newVal
-		assert.Equal(t, newVal, o.Unwrap())
-	})
-
-	t.Run("None", func(t *testing.T) {
-		o := None[int]()
-
-		newVal := fake.Int()
-		res := o.Insert(newVal)
-
-		assert.Equal(t, newVal, *res)
-
-		expected := &Option[int]{
-			ok:  true,
-			val: newVal,
-		}
-		assert.Equal(t, expected, o)
-
-		// Assert that we can directly change the Option's value with the pointer
-		newVal = fake.Int()
-		*res = newVal
-		assert.Equal(t, newVal, o.Unwrap())
-	})
-}
-
-func TestOption_GetOrInsert(t *testing.T) {
-	t.Run("Some", func(t *testing.T) {
-		val := fake.Int()
-		o := Some(val)
-
-		newVal := fake.Int()
-		res := o.GetOrInsert(newVal)
-
-		assert.Equal(t, val, *res)
-
-		expected := &Option[int]{
-			ok:  true,
-			val: val,
-		}
-		assert.Equal(t, expected, o)
-
-		// Assert that we can directly change the Option's value with the pointer
-		newVal = fake.Int()
-		*res = newVal
-		assert.Equal(t, newVal, o.Unwrap())
-	})
-
-	t.Run("None", func(t *testing.T) {
-		o := None[int]()
-
-		newVal := fake.Int()
-		res := o.GetOrInsert(newVal)
-
-		assert.Equal(t, newVal, *res)
-
-		expected := &Option[int]{
-			ok:  true,
-			val: newVal,
-		}
-		assert.Equal(t, expected, o)
-
-		// Assert that we can directly change the Option's value with the pointer
-		newVal = fake.Int()
-		*res = newVal
-		assert.Equal(t, newVal, o.Unwrap())
-	})
-}
-
-func TestOption_GetOrInsertDefault(t *testing.T) {
-	t.Run("Some", func(t *testing.T) {
-		val := fake.Int()
-		o := Some(val)
-
-		res := o.GetOrInsertDefault()
-
-		assert.Equal(t, val, *res)
-
-		expected := &Option[int]{
-			ok:  true,
-			val: val,
-		}
-		assert.Equal(t, expected, o)
-
-		// Assert that we can directly change the Option's value with the pointer
-		newVal := fake.Int()
-		*res = newVal
-		assert.Equal(t, newVal, o.Unwrap())
-	})
-
-	t.Run("None", func(t *testing.T) {
-		o := None[int]()
-
-		res := o.GetOrInsertDefault()
-
-		assert.Equal(t, 0, *res)
-
-		expected := &Option[int]{
-			ok:  true,
-			val: 0,
-		}
-		assert.Equal(t, expected, o)
-
-		// Assert that we can directly change the Option's value with the pointer
-		newVal := fake.Int()
-		*res = newVal
-		assert.Equal(t, newVal, o.Unwrap())
-	})
-}
-
-func TestOption_GetOrInsertWith(t *testing.T) {
-	t.Run("Some", func(t *testing.T) {
-		val := fake.Int()
-		o := Some(val)
-
-		newVal := fake.Int()
-		factory := func() int {
-			assert.Fail(t, "factory should not be called")
-
-			return newVal
-		}
-		res := o.GetOrInsertWith(factory)
-
-		assert.Equal(t, val, *res)
-
-		expected := &Option[int]{
-			ok:  true,
-			val: val,
-		}
-		assert.Equal(t, expected, o)
-
-		// Assert that we can directly change the Option's value with the pointer
-		newVal = fake.Int()
-		*res = newVal
-		assert.Equal(t, newVal, o.Unwrap())
-	})
-
-	t.Run("None", func(t *testing.T) {
-		o := None[int]()
-
-		newVal := fake.Int()
-		factory := func() int {
-			return newVal
-		}
-		res := o.GetOrInsertWith(factory)
-
-		assert.Equal(t, newVal, *res)
-
-		expected := &Option[int]{
-			ok:  true,
-			val: newVal,
-		}
-		assert.Equal(t, expected, o)
-
-		// Assert that we can directly change the Option's value with the pointer
-		newVal = fake.Int()
-		*res = newVal
-		assert.Equal(t, newVal, o.Unwrap())
-	})
-}
-
-func TestOption_Take(t *testing.T) {
-	t.Run("Some", func(t *testing.T) {
-		val := fake.Int()
-		o := Some(val)
-
-		res := o.Take()
-
-		expected := Some(val)
-		assert.Equal(t, expected, res)
-
-		// Original opt should now be a None
-		assert.True(t, o.IsNone())
-	})
-
-	t.Run("None", func(t *testing.T) {
-		o := None[int]()
-
-		res := o.Take()
-
-		assert.True(t, res.IsNone())
-
-		// Original opt should still be a None
-		assert.True(t, o.IsNone())
-	})
-}
-
-func TestOption_TakeIf(t *testing.T) {
-	t.Run("Some", func(t *testing.T) {
-		val := fake.Int()
-
-		for _, res := range []bool{true, false} {
-			name := fmt.Sprintf("predicate returns %v", res)
-			o := Some(val)
-
-			t.Run(name, func(t *testing.T) {
-				called := false
-				f := func(v int) bool {
-					called = true
-
-					assert.Equal(t, val, v)
-
-					return res
-				}
-
-				taken := o.TakeIf(f)
-
-				assert.True(t, called, "predicate should have been called")
-
-				if res {
-					expected := Some(val)
-					assert.Equal(t, expected, taken)
-
-					// Original opt should now be a None
-					assert.True(t, o.IsNone())
-				} else {
-					expected := None[int]()
-					assert.Equal(t, expected, taken)
-
-					// Original opt should have stayed intact
-					assert.True(t, o.IsSome())
-					assert.Equal(t, val, o.Unwrap())
-				}
-			})
-		}
-	})
-
-	t.Run("None", func(t *testing.T) {
-		for _, res := range []bool{true, false} {
-			name := fmt.Sprintf("predicate returns %v", res)
-			o := None[int]()
-
-			t.Run(name, func(t *testing.T) {
-				f := func(int) bool {
-					assert.Fail(t, "predicate should not be called")
-
-					return res
-				}
-
-				taken := o.TakeIf(f)
-
-				assert.True(t, taken.IsNone())
-
-				// Original opt should still be a None
-				assert.True(t, o.IsNone())
-			})
-		}
-	})
-}
-
-func TestOption_String(t *testing.T) {
-	t.Run("Some", func(t *testing.T) {
-		value := fake.Int()
-		o := Some(value)
-
-		expected := fmt.Sprintf("Some(%v)", value)
-
-		assert.Equal(t, expected, o.String())
-	})
-
-	t.Run("None", func(t *testing.T) {
-		o := None[int]()
-
-		expected := "None"
-
-		assert.Equal(t, expected, o.String())
+		assert.Nil(t, res)
 	})
 }
