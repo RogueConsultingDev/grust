@@ -121,7 +121,7 @@ func TestOption_AndThen(t *testing.T) {
 		value := fake.RandomStringWithLength(8)
 		other := Some(value)
 
-		res := o.AndThen(func(int) *Option[string] { return other })
+		res := o.AndThen(func(int) Option[string] { return other })
 
 		assert.Equal(t, other, res)
 	})
@@ -129,7 +129,7 @@ func TestOption_AndThen(t *testing.T) {
 	t.Run("none", func(t *testing.T) {
 		o := None[int]()
 
-		f := func(int) *Option[string] {
+		f := func(int) Option[string] {
 			assert.Fail(t, "mapper should not have been called")
 
 			return Some("")

@@ -472,7 +472,7 @@ func TestResult_Inspect(t *testing.T) {
 
 		res := r.Inspect(p)
 
-		assert.Same(t, res, r)
+		assert.Equal(t, res, r)
 		assert.True(t, called, "predicate should have been called")
 	})
 
@@ -486,7 +486,7 @@ func TestResult_Inspect(t *testing.T) {
 
 		res := r.Inspect(p)
 
-		assert.Same(t, res, r)
+		assert.Equal(t, res, r)
 	})
 }
 
@@ -501,7 +501,7 @@ func TestResult_InspectErr(t *testing.T) {
 
 		res := r.InspectErr(p)
 
-		assert.Same(t, res, r)
+		assert.Equal(t, res, r)
 	})
 
 	t.Run("Err", func(t *testing.T) {
@@ -517,7 +517,7 @@ func TestResult_InspectErr(t *testing.T) {
 
 		res := r.InspectErr(p)
 
-		assert.Same(t, res, r)
+		assert.Equal(t, res, r)
 		assert.True(t, called, "predicate should have been called")
 	})
 }
@@ -559,7 +559,7 @@ func TestResult_WrapErr(t *testing.T) {
 		val := fake.Int()
 		r := Ok(val)
 
-		assert.Same(t, r, r.WrapErr(fake.RandomStringWithLength(8)))
+		assert.Equal(t, r, r.WrapErr(fake.RandomStringWithLength(8)))
 	})
 
 	t.Run("Err", func(t *testing.T) {

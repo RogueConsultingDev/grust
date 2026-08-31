@@ -4,7 +4,7 @@ package st
 
 // Map maps a Result<T> to Result<U, E> by applying a function to a contained Ok value, leaving an Err value
 // untouched.
-func (r *Result[T]) Map[U any](f func(T) U) *Result[U] {
+func (r *Result[T]) Map[U any](f func(T) U) Result[U] {
 	if !r.ok {
 		return Err[U](r.err)
 	}

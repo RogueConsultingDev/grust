@@ -6,8 +6,8 @@ import (
 )
 
 // Ok creates an Ok variant of Result from the value.
-func Ok[T any](val T) *Result[T] {
-	return &Result[T]{
+func Ok[T any](val T) Result[T] {
+	return Result[T]{
 		ok:  true,
 		val: val,
 		err: nil,
@@ -15,10 +15,10 @@ func Ok[T any](val T) *Result[T] {
 }
 
 // Err creates an Err variant of Result from the error.
-func Err[T any](err error) *Result[T] {
+func Err[T any](err error) Result[T] {
 	var v T
 
-	return &Result[T]{
+	return Result[T]{
 		ok:  false,
 		val: v,
 		err: err,
@@ -26,7 +26,7 @@ func Err[T any](err error) *Result[T] {
 }
 
 // ResultOf creates a Result from the given value and error.
-func ResultOf[T any](val T, err error) *Result[T] {
+func ResultOf[T any](val T, err error) Result[T] {
 	if !reflect.ValueOf(&err).Elem().IsNil() {
 		return Err[T](err)
 	}
@@ -38,7 +38,7 @@ func ResultOf[T any](val T, err error) *Result[T] {
 // untouched.
 //
 // With Go 1.27+, use Result[T].Map().
-func MapResult[T any, U any](res *Result[T], f func(T) U) *Result[U] {
+func MapResult[T any, U any](res Result[T], f func(T) U) Result[U] {
 	if res.IsErr() {
 		return Err[U](res.err)
 	}
@@ -49,7 +49,7 @@ func MapResult[T any, U any](res *Result[T], f func(T) U) *Result[U] {
 // MapResultOr returns the provided default (if Err), or applies a function to the contained value (if Ok).
 //
 // With Go 1.27+, use Result[T].MapOr().
-func MapResultOr[T any, U any](res *Result[T], def U, f func(T) U) U {
+func MapResultOr[T any, U any](res Result[T], def U, f func(T) U) U {
 	if res.IsErr() {
 		return def
 	}
@@ -62,7 +62,7 @@ func MapResultOr[T any, U any](res *Result[T], def U, f func(T) U) U {
 //
 // With Go 1.27+, use Result[T].MapOrElse().
 func MapResultOrElse[T any, U any](
-	res *Result[T],
+	res Result[T],
 	factory func() U,
 	mapper func(T) U,
 ) U {
@@ -77,7 +77,7 @@ func MapResultOrElse[T any, U any](
 // untouched.
 //
 // With Go 1.27+, use Result[T].MapErr().
-func MapResultErr[T any](res *Result[T], f func(error) error) *Result[T] {
+func MapResultErr[T any](res Result[T], f func(error) error) Result[T] {
 	if res.IsOk() {
 		return res
 	}
@@ -114,9 +114,9 @@ func (r *Result[T]) IsErrAnd(f func(error) bool) bool {
 
 // MapErr maps a Result<T> to Result<T, F> by applying a function to a contained Err value, leaving an Ok value
 // untouched.
-func (r *Result[T]) MapErr(f func(error) error) *Result[T] {
+func (r *Result[T]) MapErr(f func(error) error) Result[T] {
 	if r.ok {
-		return r
+		return *r
 	}
 
 	return Err[T](f(r.err))
@@ -192,25 +192,25 @@ func (r *Result[T]) UnwrapErr() error {
 }
 
 // Inspect calls a function with a reference to the contained value if Ok. Returns the original result.
-func (r *Result[T]) Inspect(f func(*T)) *Result[T] {
+func (r *Result[T]) Inspect(f func(*T)) Result[T] {
 	if r.ok {
 		f(&r.val)
 	}
 
-	return r
+	return *r
 }
 
 // InspectErr calls a function with a reference to the contained value if Err. Returns the original result.
-func (r *Result[T]) InspectErr(f func(error)) *Result[T] {
+func (r *Result[T]) InspectErr(f func(error)) Result[T] {
 	if !r.ok {
 		f(r.err)
 	}
 
-	return r
+	return *r
 }
 
 // AsOptionValue converts a Result to a Some when res is a result.Ok or None when res is a result.Err.
-func (r *Result[T]) AsOptionValue() *Option[T] {
+func (r *Result[T]) AsOptionValue() Option[T] {
 	if r.ok {
 		return Some(r.val)
 	}
@@ -219,7 +219,7 @@ func (r *Result[T]) AsOptionValue() *Option[T] {
 }
 
 // AsOptionErr converts a Result to a Some when res is a result.Err or None when res is a result.Ok.
-func (r *Result[T]) AsOptionErr() *Option[error] {
+func (r *Result[T]) AsOptionErr() Option[error] {
 	if !r.ok {
 		return Some(r.err)
 	}
@@ -228,12 +228,12 @@ func (r *Result[T]) AsOptionErr() *Option[error] {
 }
 
 // WrapErr wraps the error of an Err, leaving Ok untouched.
-func (r *Result[T]) WrapErr(msg string) *Result[T] {
+func (r *Result[T]) WrapErr(msg string) Result[T] {
 	if !r.ok {
 		return Err[T](fmt.Errorf("%s: %w", msg, r.err))
 	}
 
-	return r
+	return *r
 }
 
 // Expand returns the Result as a standard Go (T, error).

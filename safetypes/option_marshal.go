@@ -3,8 +3,8 @@ package st
 import "encoding/json"
 
 // MarshalJSON implements json.Marshaler.
-func (o *Option[T]) MarshalJSON() ([]byte, error) {
-	if o == nil || !o.ok {
+func (o Option[T]) MarshalJSON() ([]byte, error) {
+	if !o.ok {
 		return []byte("null"), nil
 	}
 
