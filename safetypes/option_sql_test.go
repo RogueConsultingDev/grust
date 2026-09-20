@@ -4,6 +4,10 @@ import (
 	"database/sql"
 	"testing"
 
+	"github.com/google/uuid"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
+
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -277,4 +281,29 @@ func TestOption_SQLFetch(t *testing.T) {
 			assert.Equal(t, tt.expectedS, s)
 		})
 	}
+}
+
+func TestGorm(t *testing.T) {
+	type TestModel struct {
+		ID uuid.UUID `gorm:"primaryKey;type:uuid"`
+		I  Option[int]
+		S  Option[string]
+	}
+
+	db, err := gorm.Open(sqlite.Open(":memory:"))
+	require.NoError(t, err)
+
+	err = db.AutoMigrate(&TestModel{})
+	require.NoError(t, err)
+
+	data := TestModel{ID: uuid.New(), I: Some[int](42), S: Some("forty two")}
+
+	err = db.Create(&data).Error
+	require.NoError(t, err)
+
+	var dbData TestModel
+	err = db.First(&dbData).Error
+	require.NoError(t, err)
+
+	assert.Equal(t, data, dbData)
 }
