@@ -1,8 +1,10 @@
 package st
 
 import (
+	"database/sql"
 	"testing"
 
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -112,4 +114,167 @@ func TestOption_Value(t *testing.T) {
 
 		assert.Nil(t, res)
 	})
+}
+
+func newTestDB(t *testing.T) *sql.DB {
+	t.Helper()
+
+	db, err := sql.Open("sqlite3", ":memory:")
+	require.NoError(t, err)
+
+	t.Cleanup(func() {
+		_ = db.Close()
+	})
+
+	return db
+}
+
+func TestOption_SQLInsert(t *testing.T) {
+	createTableStmt := "CREATE TABLE test (i INTEGER, s TEXT)"
+	insertStmt := "INSERT INTO test VALUES (?, ?)"
+	selectStmt := "SELECT i, s FROM test"
+
+	tests := []struct {
+		name      string
+		i         Option[int64]
+		s         Option[string]
+		expectedI sql.NullInt64
+		expectedS sql.NullString
+	}{
+		{
+			name:      "none",
+			i:         None[int64](),
+			s:         None[string](),
+			expectedI: sql.NullInt64{Valid: false, Int64: 0},
+			expectedS: sql.NullString{Valid: false, String: ""},
+		},
+		{
+			name:      "some with zero values",
+			i:         Some[int64](0),
+			s:         Some(""),
+			expectedI: sql.NullInt64{Valid: true, Int64: 0},
+			expectedS: sql.NullString{Valid: true, String: ""},
+		},
+		{
+			name:      "some with values",
+			i:         Some[int64](42),
+			s:         Some("forty two"),
+			expectedI: sql.NullInt64{Valid: true, Int64: 42},
+			expectedS: sql.NullString{Valid: true, String: "forty two"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db := newTestDB(t)
+			_, err := db.ExecContext(t.Context(), createTableStmt)
+			require.NoError(t, err)
+
+			stmt, err := db.PrepareContext(t.Context(), insertStmt)
+			require.NoError(t, err)
+
+			defer stmt.Close()
+
+			// Save the values
+			res, err := stmt.ExecContext(t.Context(), tt.i, tt.s)
+			require.NoError(t, err)
+
+			rowsCount, err := res.RowsAffected()
+			require.NoError(t, err)
+
+			assert.EqualValues(t, 1, rowsCount)
+
+			// Check what was inserted
+			var i sql.NullInt64
+			var s sql.NullString
+
+			rows, err := db.QueryContext(t.Context(), selectStmt)
+			require.NoError(t, err)
+			require.NoError(t, rows.Err())
+
+			defer rows.Close()
+
+			require.True(t, rows.Next())
+			err = rows.Scan(&i, &s)
+			require.NoError(t, err)
+
+			assert.Equal(t, tt.expectedI, i)
+			assert.Equal(t, tt.expectedS, s)
+		})
+	}
+}
+
+func TestOption_SQLFetch(t *testing.T) {
+	createTableStmt := "CREATE TABLE test (i INTEGER, s TEXT)"
+	insertStmt := "INSERT INTO test VALUES (?, ?)"
+	selectStmt := "SELECT i, s FROM test"
+
+	tests := []struct {
+		name      string
+		i         sql.NullInt64
+		s         sql.NullString
+		expectedI Option[int64]
+		expectedS Option[string]
+	}{
+		{
+			name:      "none",
+			i:         sql.NullInt64{Valid: false, Int64: 0},
+			s:         sql.NullString{Valid: false, String: ""},
+			expectedI: None[int64](),
+			expectedS: None[string](),
+		},
+		{
+			name:      "some with zero values",
+			i:         sql.NullInt64{Valid: true, Int64: 0},
+			s:         sql.NullString{Valid: true, String: ""},
+			expectedI: Some[int64](0),
+			expectedS: Some(""),
+		},
+		{
+			name:      "some with values",
+			i:         sql.NullInt64{Valid: true, Int64: 42},
+			s:         sql.NullString{Valid: true, String: "forty two"},
+			expectedI: Some[int64](42),
+			expectedS: Some("forty two"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db := newTestDB(t)
+			_, err := db.ExecContext(t.Context(), createTableStmt)
+			require.NoError(t, err)
+
+			stmt, err := db.PrepareContext(t.Context(), insertStmt)
+			require.NoError(t, err)
+
+			defer stmt.Close()
+
+			// Save the values
+			res, err := stmt.ExecContext(t.Context(), tt.i, tt.s)
+			require.NoError(t, err)
+
+			rowsCount, err := res.RowsAffected()
+			require.NoError(t, err)
+
+			assert.EqualValues(t, 1, rowsCount)
+
+			// Check what was inserted
+			var i Option[int64]
+			var s Option[string]
+
+			rows, err := db.QueryContext(t.Context(), selectStmt)
+			require.NoError(t, err)
+			require.NoError(t, rows.Err())
+
+			defer rows.Close()
+
+			require.True(t, rows.Next())
+			err = rows.Scan(&i, &s)
+			require.NoError(t, err)
+
+			assert.Equal(t, tt.expectedI, i)
+			assert.Equal(t, tt.expectedS, s)
+		})
+	}
 }
